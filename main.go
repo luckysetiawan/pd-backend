@@ -8,10 +8,10 @@ package main
 
 import (
 	"fmt"
-
+	
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	controllers "github.com/pd-backend-2/controllers"
+	controllers "pd-backend/controller"
 )
 
 func main() {

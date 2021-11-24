@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	model "github.com/pd-backend/model"
+	model "pd-backend/model"
 )
 
 // Get All Menus
