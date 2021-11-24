@@ -5,16 +5,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	model "pd-backend/model"
+
+	"github.com/gin-gonic/gin"
 )
 
-// Get All Menus
-func GetAllMenus(c *gin.Context) {
+// Get All Pizzas
+func GetAllPizzas(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	query := "SELECT * FROM menus"
+	query := "SELECT * FROM pizza"
 
 	nama := c.Query("nama")
 	if nama != "" {
@@ -26,29 +27,29 @@ func GetAllMenus(c *gin.Context) {
 		log.Println(err)
 	}
 
-	var menu model.Menu
-	var menus []model.Menu
+	var pizza model.Pizza
+	var pizzas []model.Pizza
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Harga, &menu.Varian); err != nil {
+		if err := rows.Scan(&pizza.ID, &pizza.Nama, &pizza.Harga, &pizza.Varian); err != nil {
 			log.Fatal(err.Error)
 		} else {
-			menus = append(menus, menu)
+			pizzas = append(pizzas, pizza)
 		}
 	}
 
-	var response model.MenuResponse
+	var response model.PizzaResponse
 	if err == nil {
-		response.Message = "Get Menu Success"
-		response.Data = menus
-		sendMenuSuccessresponse(c, response)
+		response.Message = "Get Pizza Success"
+		response.Data = pizzas
+		sendPizzaSuccessresponse(c, response)
 	} else {
-		response.Message = "Get Menu Query Error"
-		sendMenuErrorResponse(c, response)
+		response.Message = "Get Pizza Query Error"
+		sendPizzaErrorResponse(c, response)
 	}
 }
 
-// Insert Menu
-func InsertMenu(c *gin.Context) {
+// Insert Pizza
+func InsertPizza(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
@@ -56,95 +57,95 @@ func InsertMenu(c *gin.Context) {
 	harga, _ := strconv.Atoi(c.PostForm("harga"))
 	varian := c.PostForm("varian")
 
-	_, errQuery := db.Exec("INSERT INTO menus(nama, harga, varian) values (?,?,?)",
+	_, errQuery := db.Exec("INSERT INTO pizza(nama, harga, varian) values (?,?,?)",
 		nama,
 		harga,
 		varian,
 	)
 
-	var response model.MenuResponse
+	var response model.PizzaResponse
 	if errQuery == nil {
-		response.Message = "Insert Menu Success"
-		sendMenuSuccessresponse(c, response)
+		response.Message = "Insert Pizza Success"
+		sendPizzaSuccessresponse(c, response)
 	} else {
-		response.Message = "Insert Menu Failed Error"
-		sendMenuErrorResponse(c, response)
+		response.Message = "Insert Pizza Failed Error"
+		sendPizzaErrorResponse(c, response)
 	}
 }
 
-// Update Menu
-func UpdateMenu(c *gin.Context) {
+// Update Pizza
+func UpdatePizza(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
 	nama := c.PostForm("nama")
 	harga, _ := strconv.Atoi(c.PostForm("harga"))
 	varian := c.PostForm("varian")
-	menuId := c.Param("menu_id")
+	pizzaId := c.Param("pizza_id")
 
-	rows, _ := db.Query("SELECT * FROM menus WHERE id='" + menuId + "'")
-	var menu model.Menu
+	rows, _ := db.Query("SELECT * FROM pizza WHERE id='" + pizzaId + "'")
+	var pizza model.Pizza
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Harga, &menu.Varian); err != nil {
+		if err := rows.Scan(&pizza.ID, &pizza.Nama, &pizza.Harga, &pizza.Varian); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
 
 	// Jika kosong dimasukkan nilai lama
 	if nama == "" {
-		nama = menu.Nama
+		nama = pizza.Nama
 	}
 
 	if harga == 0 {
-		harga = menu.Harga
+		harga = pizza.Harga
 	}
 
 	if varian == "" {
-		varian = menu.Varian
+		varian = pizza.Varian
 	}
 
-	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, varian = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE pizza SET nama = ?, harga = ?, varian = ? WHERE id=?",
 		nama,
 		harga,
 		varian,
-		menuId,
+		pizzaId,
 	)
 
-	var response model.MenuResponse
+	var response model.PizzaResponse
 	if errQuery == nil {
-		response.Message = "Update Menu Success"
-		sendMenuSuccessresponse(c, response)
+		response.Message = "Update Pizza Success"
+		sendPizzaSuccessresponse(c, response)
 	} else {
-		response.Message = "Update Menu Failed Error"
-		sendMenuErrorResponse(c, response)
+		response.Message = "Update Pizza Failed Error"
+		sendPizzaErrorResponse(c, response)
 	}
 }
 
-// Delete Menu
-func DeleteMenu(c *gin.Context) {
+// Delete Pizza
+func DeletePizza(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	menuId := c.Param("menu_id")
+	pizzaId := c.Param("pizza_id")
 
-	_, errQuery := db.Exec("DELETE FROM menus WHERE id=?",
-		menuId,
+	_, errQuery := db.Exec("DELETE FROM pizza WHERE id=?",
+		pizzaId,
 	)
 
-	var response model.MenuResponse
+	var response model.PizzaResponse
 	if errQuery == nil {
-		response.Message = "Delete Menu Success"
-		sendMenuSuccessresponse(c, response)
+		response.Message = "Delete Pizza Success"
+		sendPizzaSuccessresponse(c, response)
 	} else {
-		response.Message = "Delete Menu Failed Error"
-		sendMenuErrorResponse(c, response)
+		response.Message = "Delete Pizza Failed Error"
+		sendPizzaErrorResponse(c, response)
 	}
 }
 
-func sendMenuSuccessresponse(c *gin.Context, ur model.MenuResponse) {
+func sendPizzaSuccessresponse(c *gin.Context, ur model.PizzaResponse) {
 	c.JSON(http.StatusOK, ur)
 }
 
-func sendMenuErrorResponse(c *gin.Context, ur model.MenuResponse) {
+func sendPizzaErrorResponse(c *gin.Context, ur model.PizzaResponse) {
 	c.JSON(http.StatusBadRequest, ur)
 }

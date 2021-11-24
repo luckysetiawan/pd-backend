@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	model "pd-backend/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Get All Users
@@ -28,7 +29,7 @@ func GetAllUsers(c *gin.Context) {
 	var user model.User
 	var users []model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp, &user.Password); err != nil {
 			log.Fatal(err.Error)
 		} else {
 			users = append(users, user)
@@ -54,11 +55,13 @@ func Registrasi(c *gin.Context) {
 	nama := c.PostForm("nama")
 	email := c.PostForm("email")
 	notelp := c.PostForm("notelp")
+	password := c.PostForm("password")
 
-	_, errQuery := db.Exec("INSERT INTO users(nama, email, notelp) values (?,?,?)",
+	_, errQuery := db.Exec("INSERT INTO users(nama, email, notelp, password) values (?,?,?,?)",
 		nama,
 		email,
 		notelp,
+		password,
 	)
 
 	var response model.UserResponse
@@ -79,12 +82,13 @@ func UpdateUser(c *gin.Context) {
 	nama := c.PostForm("nama")
 	email := c.PostForm("email")
 	notelp := c.PostForm("notelp")
+	password := c.PostForm("password")
 	userId := c.Param("user_id")
 
 	rows, _ := db.Query("SELECT * FROM users WHERE id='" + userId + "'")
 	var user model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.Password, &user.NoTelp); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -102,11 +106,12 @@ func UpdateUser(c *gin.Context) {
 		notelp = user.NoTelp
 	}
 
-	_, errQuery := db.Exec("UPDATE users SET nama = ?, email = ?, notelp = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE users SET nama = ?, email = ?, notelp = ?, password = ? WHERE id=?",
 		nama,
 		email,
 		notelp,
 		userId,
+		password,
 	)
 
 	var response model.UserResponse
