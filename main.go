@@ -50,5 +50,5 @@ func main() {
 	}
 
 	fmt.Println("Connected to port 8080")
-	router.Run()
+	router.Run(":8080")
 }
