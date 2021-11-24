@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	model "pd-backend/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Get All Menus
@@ -29,7 +30,7 @@ func GetAllMenus(c *gin.Context) {
 	var menu model.Menu
 	var menus []model.Menu
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Harga, &menu.Varian); err != nil {
+		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
 			log.Fatal(err.Error)
 		} else {
 			menus = append(menus, menu)
@@ -38,11 +39,11 @@ func GetAllMenus(c *gin.Context) {
 
 	var response model.MenuResponse
 	if err == nil {
-		response.Message = "Get Menu Success"
+		response.Message = "Get All Menu Success"
 		response.Data = menus
 		sendMenuSuccessresponse(c, response)
 	} else {
-		response.Message = "Get Menu Query Error"
+		response.Message = "Get All Menu Query Error"
 		sendMenuErrorResponse(c, response)
 	}
 }
@@ -53,12 +54,16 @@ func InsertMenu(c *gin.Context) {
 	defer db.Close()
 
 	nama := c.PostForm("nama")
+	deskripsi := c.PostForm("deskripsi")
 	harga, _ := strconv.Atoi(c.PostForm("harga"))
+	gambar := c.PostForm("gambar")
 	varian := c.PostForm("varian")
 
-	_, errQuery := db.Exec("INSERT INTO menus(nama, harga, varian) values (?,?,?)",
+	_, errQuery := db.Exec("INSERT INTO menus(nama, deskripsi, harga, gambar, varian) values (?,?,?,?,?)",
 		nama,
+		deskripsi,
 		harga,
+		gambar,
 		varian,
 	)
 
@@ -78,14 +83,16 @@ func UpdateMenu(c *gin.Context) {
 	defer db.Close()
 
 	nama := c.PostForm("nama")
+	deskripsi := c.PostForm("deskripsi")
 	harga, _ := strconv.Atoi(c.PostForm("harga"))
+	gambar := c.PostForm("gambar")
 	varian := c.PostForm("varian")
 	menuId := c.Param("menu_id")
 
 	rows, _ := db.Query("SELECT * FROM menus WHERE id='" + menuId + "'")
 	var menu model.Menu
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Harga, &menu.Varian); err != nil {
+		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -95,17 +102,27 @@ func UpdateMenu(c *gin.Context) {
 		nama = menu.Nama
 	}
 
+	if deskripsi == "" {
+		deskripsi = menu.Deskripsi
+	}
+
 	if harga == 0 {
 		harga = menu.Harga
+	}
+
+	if gambar == "" {
+		gambar = menu.Gambar
 	}
 
 	if varian == "" {
 		varian = menu.Varian
 	}
 
-	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, varian = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE menus SET nama = ?, deskripsi = ?, harga = ?, gambar = ?, varian = ? WHERE id=?",
 		nama,
+		deskripsi,
 		harga,
+		gambar,
 		varian,
 		menuId,
 	)

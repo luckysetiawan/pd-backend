@@ -8,10 +8,11 @@ package main
 
 import (
 	"fmt"
-	
+
+	controllers "pd-backend/controller"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	controllers "pd-backend/controller"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 		// Menambahkan menu baru
 		admin.POST("/menu", controllers.InsertMenu)
 		// Mengubah data menu berdasarkan ID
-		admin.PUT("/menu/:menu_id", controllers.UpdateMenu)
+		admin.PUT("/updatemenu/:menu_id", controllers.UpdateMenu)
 		// Menghapus menu
 		admin.DELETE("/deletemenu/:menu_id", controllers.DeleteMenu)
 	}
