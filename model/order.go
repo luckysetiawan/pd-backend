@@ -13,7 +13,6 @@ type Order struct {
 type OrderDetail struct {
 	ID           int     `form:"id" json:"id"`
 	Pizza        int     `form:"pizza" json:"pizza"`
-	Alamat       string  `form:"alamat" json:"alamat"`
 	Rating       int     `form:"rating" json:"rating"`
 	Quantity     int     `form:"quantity" json:"quantity"`
 	TotalPesanan float64 `form:"totalPesanan" json:"totalPesanan"`
