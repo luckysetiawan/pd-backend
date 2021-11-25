@@ -31,7 +31,7 @@ func GetAllMenus(c *gin.Context) {
 	var menus []model.Menu
 	for rows.Next() {
 		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
-			log.Fatal(err.Error)
+			log.Fatal(err.Error())
 		} else {
 			menus = append(menus, menu)
 		}
@@ -39,11 +39,11 @@ func GetAllMenus(c *gin.Context) {
 
 	var response model.MenuResponse
 	if err == nil {
-		response.Message = "Get All Menu Success"
+		response.Message = "Get Menu Success"
 		response.Data = menus
 		sendMenuSuccessresponse(c, response)
 	} else {
-		response.Message = "Get All Menu Query Error"
+		response.Message = "Get Menu Query Error"
 		sendMenuErrorResponse(c, response)
 	}
 }
@@ -118,11 +118,9 @@ func UpdateMenu(c *gin.Context) {
 		varian = menu.Varian
 	}
 
-	_, errQuery := db.Exec("UPDATE menus SET nama = ?, deskripsi = ?, harga = ?, gambar = ?, varian = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, varian = ? WHERE id=?",
 		nama,
-		deskripsi,
 		harga,
-		gambar,
 		varian,
 		menuId,
 	)

@@ -6,7 +6,6 @@ import (
 
 	model "pd-backend/model"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +30,7 @@ func GetAllUsers(c *gin.Context) {
 	var users []model.User
 	for rows.Next() {
 		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp); err != nil {
-			log.Fatal(err.Error)
+			log.Fatal(err.Error())
 		} else {
 			users = append(users, user)
 		}
@@ -159,7 +158,7 @@ func Login(c *gin.Context) {
 
 	var user model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp, &user.Password); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.Password, &user.NoTelp); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -167,11 +166,8 @@ func Login(c *gin.Context) {
 	var response model.UserResponse
 
 	if user.Password == password {
-		session := sessions.Default(c)
-		session.Set("nama", user.Nama)
-		session.Set("email", user.Email)
-		session.Set("noTelp", user.NoTelp)
-		session.Save()
+
+		generateToken(c, user.ID, user.Nama, user.Email)
 		response.Message = "Login Success"
 		sendUserSuccessresponse(c, response)
 	} else {
@@ -182,9 +178,11 @@ func Login(c *gin.Context) {
 
 // Logout...
 func Logout(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Clear()
-	session.Save()
+	resetUserToken(c)
+
+	var response model.UserResponse
+	response.Message = "Logout Success"
+	sendUserSuccessresponse(c, response)
 }
 
 func sendUserSuccessresponse(c *gin.Context, ur model.UserResponse) {
