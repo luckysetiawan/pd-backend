@@ -148,6 +148,7 @@ func Login(c *gin.Context) {
 	defer db.Close()
 
 	email := c.PostForm("email")
+	password := c.PostForm("password")
 
 	query := "SELECT * FROM users where email='" + email + "'"
 
@@ -158,17 +159,18 @@ func Login(c *gin.Context) {
 
 	var user model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp, &user.Password); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
 
 	var response model.UserResponse
 
-	if user.Email == email {
+	if user.Password == password {
 		session := sessions.Default(c)
-		session.Set("email", user.Email)
 		session.Set("nama", user.Nama)
+		session.Set("email", user.Email)
+		session.Set("noTelp", user.NoTelp)
 		session.Save()
 		response.Message = "Login Success"
 		sendUserSuccessresponse(c, response)
