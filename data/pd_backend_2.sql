@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.2
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2021 at 08:49 AM
--- Server version: 10.4.13-MariaDB
--- PHP Version: 7.4.8
+-- Waktu pembuatan: 25 Nov 2021 pada 12.12
+-- Versi server: 10.4.21-MariaDB
+-- Versi PHP: 8.0.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `menus`
+-- Struktur dari tabel `menus`
 --
 
 CREATE TABLE `menus` (
@@ -37,7 +37,7 @@ CREATE TABLE `menus` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `menus`
+-- Dumping data untuk tabel `menus`
 --
 
 INSERT INTO `menus` (`id`, `nama`, `deskripsi`, `harga`, `gambar`, `varian`) VALUES
@@ -57,7 +57,7 @@ INSERT INTO `menus` (`id`, `nama`, `deskripsi`, `harga`, `gambar`, `varian`) VAL
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order`
+-- Struktur dari tabel `order`
 --
 
 CREATE TABLE `order` (
@@ -71,39 +71,44 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `order`
+-- Dumping data untuk tabel `order`
 --
 
 INSERT INTO `order` (`id`, `idCustomer`, `idOrderDetail`, `invoice`, `waktu`, `alamat`, `status`) VALUES
-(0, 1, 1, 'P-2021-11-25 14:35:42', '2021-11-25 14:35:42', 'Pluto', 0),
+(1, 1, 1, 'P-2021-11-25 14:35:42', '2021-11-25 14:35:42', 'Pluto', 0),
 (40, 2, 2, 'P-2021-11-24 19:03:15', '2021-11-24 19:03:15', 'MARSSSSSSS', 2),
-(41, 2, 2, 'P-2021-11-24 20:39:19', '2021-11-24 20:39:19', 'Moon', 1);
+(41, 2, 2, 'P-2021-11-24 20:39:19', '2021-11-24 20:39:19', 'Moon', 1),
+(45, 2, 2, 'P-2021-11-25 16:47:36', '2021-11-25 16:47:36', 'Pluto', 1),
+(46, 2, 2, 'P-2021-11-25 16:51:56', '2021-11-25 16:51:56', 'MARSSSSSSS', 0),
+(47, 2, 2, 'P-2021-11-25 16:54:07', '2021-11-25 16:54:07', 'Angkasa', 2),
+(49, 2, 1, 'P-2021-11-25 17:02', '2021-11-25 17:02:25', 'MARSSSSSSS', 0),
+(50, 2, 1, 'P-2021-11-25 17:22', '2021-11-25 17:22:03', 'MARSSSSSSS', 0);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orderdetail`
+-- Struktur dari tabel `orderdetail`
 --
 
 CREATE TABLE `orderdetail` (
   `id` int(50) NOT NULL,
-  `pizza` int(50) NOT NULL,
+  `menu` int(50) NOT NULL,
   `rating` int(50) NOT NULL,
   `quantity` int(50) NOT NULL,
   `totalPesanan` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `orderdetail`
+-- Dumping data untuk tabel `orderdetail`
 --
 
-INSERT INTO `orderdetail` (`id`, `pizza`, `rating`, `quantity`, `totalPesanan`) VALUES
+INSERT INTO `orderdetail` (`id`, `menu`, `rating`, `quantity`, `totalPesanan`) VALUES
 (1, 1, 5, 2, 100000);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment`
+-- Struktur dari tabel `payment`
 --
 
 CREATE TABLE `payment` (
@@ -113,16 +118,16 @@ CREATE TABLE `payment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `payment`
+-- Dumping data untuk tabel `payment`
 --
 
 INSERT INTO `payment` (`invoice`, `statusPembayaran`, `totalHarga`) VALUES
-('pay01', 1, 100000);
+('P-2021-11-25 14:35:42', 1, 100000);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Struktur dari tabel `users`
 --
 
 CREATE TABLE `users` (
@@ -134,10 +139,11 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `users`
+-- Dumping data untuk tabel `users`
 --
 
 INSERT INTO `users` (`id`, `nama`, `email`, `password`, `notelp`) VALUES
+(0, 'test', 'test@gmail.com', '', '0819238923'),
 (1, 'Dave', 'dave@gmail.com', 'dave123', '089123123123'),
 (2, 'Christian', 'christian@gmail.com', 'christian123', '089098098098'),
 (3, 'Lucky', 'lucky@gmail.com', 'lucky123', '089234234234'),
@@ -149,7 +155,13 @@ INSERT INTO `users` (`id`, `nama`, `email`, `password`, `notelp`) VALUES
 --
 
 --
--- Indexes for table `order`
+-- Indeks untuk tabel `menus`
+--
+ALTER TABLE `menus`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeks untuk tabel `order`
 --
 ALTER TABLE `order`
   ADD PRIMARY KEY (`id`),
@@ -158,17 +170,55 @@ ALTER TABLE `order`
   ADD KEY `idCustomer` (`idCustomer`);
 
 --
--- Indexes for table `orderdetail`
+-- Indeks untuk tabel `orderdetail`
 --
 ALTER TABLE `orderdetail`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `pizza` (`pizza`);
+  ADD KEY `menu` (`menu`);
 
 --
--- Indexes for table `payment`
+-- Indeks untuk tabel `payment`
 --
 ALTER TABLE `payment`
   ADD PRIMARY KEY (`invoice`);
+
+--
+-- Indeks untuk tabel `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT untuk tabel yang dibuang
+--
+
+--
+-- AUTO_INCREMENT untuk tabel `menus`
+--
+ALTER TABLE `menus`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT untuk tabel `order`
+--
+ALTER TABLE `order`
+  MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+
+--
+-- AUTO_INCREMENT untuk tabel `orderdetail`
+--
+ALTER TABLE `orderdetail`
+  MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
+--
+
+--
+-- Ketidakleluasaan untuk tabel `orderdetail`
+--
+ALTER TABLE `orderdetail`
+  ADD CONSTRAINT `menu` FOREIGN KEY (`menu`) REFERENCES `menus` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
