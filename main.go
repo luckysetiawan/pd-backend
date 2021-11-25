@@ -35,6 +35,11 @@ func main() {
 	// Admin
 	admin := router.Group("/admin")
 	{
+		// Login Staff
+		admin.POST("/login", controllers.Login)
+		// Logout Staff
+		admin.GET("/logout", controllers.Logout)
+
 		// Melihat seluruh member
 		admin.GET("/alluser", controllers.GetAllUsers)
 		// Mengubah data user
@@ -44,11 +49,24 @@ func main() {
 		// Menambahkan menu baru
 		admin.POST("/menu", controllers.InsertMenu)
 		// Mengubah data menu berdasarkan ID
-		admin.PUT("/updatemenu/:menu_id", controllers.UpdateMenu)
+		admin.PUT("/menu/:menu_id", controllers.UpdateMenu)
 		// Menghapus menu
 		admin.DELETE("/deletemenu/:menu_id", controllers.DeleteMenu)
 	}
 
+	//Order
+	order := router.Group("/order")
+	{
+		// Melihat seluruh order
+		order.GET("/allorder", controllers.GetAllOrders)
+		// Membuat order
+		order.POST("/create", controllers.InsertOrder)
+		// Update order
+		order.PUT("/update/:order_id", controllers.UpdateOrder)
+		// Delete order
+		order.DELETE("/delete/:order_id", controllers.DeleteOrder)
+	}
+
 	fmt.Println("Connected to port 8080")
-	router.Run(":8080")
+	router.Run()
 }
