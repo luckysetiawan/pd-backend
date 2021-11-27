@@ -1,17 +1,13 @@
-/*
- * Dependencies :
- * gin   : go get github.com/gin-gonic/gin
- * mysql : go get github.com/go-sql-driver/mysql
- * jwt   : go get github.com/dgrijalva/jwt-go
- */
 package main
 
 import (
 	"fmt"
+	"time"
 
 	controllers "pd-backend/controller"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -19,6 +15,18 @@ func main() {
 	fmt.Println("REST API Pizza Delivery")
 
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH","DELETE"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+		  return origin == "*"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 
 	// User Registration
 	router.POST("/registrasi", controllers.Registrasi)
@@ -71,6 +79,6 @@ func main() {
 		order.DELETE("/delete/:order_id", controllers.DeleteOrder)
 	}
 
+	router.Run(":8080")
 	fmt.Println("Connected to port 8080")
-	router.Run()
 }
