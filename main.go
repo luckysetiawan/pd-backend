@@ -6,8 +6,8 @@ import (
 
 	controllers "pd-backend/controller"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -18,12 +18,12 @@ func main() {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH","DELETE"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-		  return origin == "*"
+			return origin == "*"
 		},
 		MaxAge: 12 * time.Hour,
 	}))
@@ -74,9 +74,9 @@ func main() {
 		// Membuat order
 		order.POST("/create", controllers.InsertOrder)
 		// Update order
-		order.PUT("/update/:order_id", controllers.UpdateOrder)
+		order.PUT("/:order_id", controllers.UpdateOrder)
 		// Delete order
-		order.DELETE("/delete/:order_id", controllers.DeleteOrder)
+		order.DELETE("/:order_id", controllers.DeleteOrder)
 	}
 
 	router.Run(":8080")

@@ -30,7 +30,7 @@ func GetAllMenus(c *gin.Context) {
 	var menu model.Menu
 	var menus []model.Menu
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
+		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar); err != nil {
 			log.Fatal(err.Error())
 		} else {
 			menus = append(menus, menu)
@@ -86,13 +86,12 @@ func UpdateMenu(c *gin.Context) {
 	deskripsi := c.PostForm("deskripsi")
 	harga, _ := strconv.Atoi(c.PostForm("harga"))
 	gambar := c.PostForm("gambar")
-	varian := c.PostForm("varian")
 	menuId := c.Param("menu_id")
 
 	rows, _ := db.Query("SELECT * FROM menus WHERE id='" + menuId + "'")
 	var menu model.Menu
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
+		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -114,14 +113,9 @@ func UpdateMenu(c *gin.Context) {
 		gambar = menu.Gambar
 	}
 
-	if varian == "" {
-		varian = menu.Varian
-	}
-
-	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, varian = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, WHERE id=?",
 		nama,
 		harga,
-		varian,
 		menuId,
 	)
 
