@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	model "pd-backend/model"
 
@@ -149,76 +151,69 @@ func InsertOrder(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	// Nama := c.PostForm("nama")
-	// NoTelp := c.PostForm("no_telp")
-	// CustomerEmail := c.PostForm("customer_email")
+	CustomerEmail := c.PostForm("customer_email")
+	Nama := c.PostForm("nama")
+	NoTelp := c.PostForm("no_telp")
 
-	// _, errCustomer := db.Exec("INSERT INTO customer (nama, no_telp) values (?,?)",
-	// 	Nama,
-	// 	NoTelp,
-	// )
+	db.Exec("INSERT INTO customer (email, nama, no_telp) values (?,?,?)",
+		CustomerEmail,
+		Nama,
+		NoTelp,
+	)
 
-	// var cr model.CustomerResponse
-	// if errCustomer == nil {
-	// 	cr.Message = "Insert Order Success"
-	// 	sendSuccessCustomerresponse(c, cr)
+	Pizza := c.PostForm("pizza_id")
+	quantity := c.PostForm("quantity")
+	pizzaArr := strings.Split(Pizza, ",")
+	quantityArr := strings.Split(quantity, ",")
+
+	for i := 0; i < len(pizzaArr); i++ {
+		db.Exec("INSERT INTO orderdetail (pizza_id, quantity) values (?,?)",
+			pizzaArr[i],
+			quantityArr[i],
+		)
+
+	}
+
+	ID, _ := strconv.Atoi(c.PostForm("id"))
+	Waktu := time.Now()
+	Alamat := c.PostForm("alamat")
+	Status, _ := strconv.Atoi("0")
+	Rating, _ := strconv.Atoi(c.PostForm("rating"))
+	_, errQuery := db.Exec("INSERT INTO `order`(id, customer_email, waktu, alamat, status, rating) values (?,?,?,?,?,?)",
+		ID,
+		CustomerEmail,
+		Waktu,
+		Alamat,
+		Status,
+		Rating,
+	)
+
+	// var orderID model.Order
+	// if c.PostForm("id") == "" {
+	// 	getID, errID := db.Query("SELECT id FROM `order` WHERE waktu=" + time.Now() + ";")
+	// 	if err := getID.Scan(&orderID.ID); errID != nil {
+	// 		log.Fatal(err.Error)
+	// 		log.Println(err.Error)
+	// 		fmt.Println(ID)
+	// 	}
 	// } else {
-	// 	cr.Message = "Insert Order Failed Error"
-	// 	fmt.Print(errCustomer)
-	// 	sendSuccessCustomerresponse(c, cr)
+	// 	orderID.ID = ID
 	// }
 
-	// ID, _ := strconv.Atoi(c.PostForm("id"))
-	// Waktu := time.Now()
-	// Alamat := c.PostForm("alamat")
-	// Status, _ := strconv.Atoi("0")
-	// Rating, _ := strconv.Atoi(c.PostForm("rating"))
-
-	// _, errQuery := db.Exec("INSERT INTO `order`(id, customer_email, waktu, alamat, status, rating) values (?,?,?,?,?,?)",
-	// 	ID,
+	// _, errQuery := db.Exec("INSERT INTO payment(order_id,customer_email, status_pembayaran) values (?,?,0)",
+	// 	orderID,
 	// 	CustomerEmail,
-	// 	Waktu,
-	// 	Alamat,
-	// 	Status,
-	// 	Rating,
 	// )
 
-	// var response model.OrderResponse
-	// if errQuery == nil {
-	// 	response.Message = "Insert Order Success"
-	// 	response.DataOrder = GetDataResponse(strconv.Itoa(ID), c)
-	// 	sendSuccessresponse(c, response)
-	// } else {
-	// 	response.Message = "Insert Order Failed Error"
-	// 	fmt.Print(errQuery)
-	// 	sendSuccessresponse(c, response)
-	// }
-
-	var OrderJson []model.OrderDetail
-	if c.BindJSON(&OrderJson) == nil {
-
-		// var Ord model.OrderDetail
-		// var ListOrder []model.OrderDetail
-		// ListOrder = c.PostForm("order")
-		// var ListOrder model.OrderDetail
-		// ListOrder := c.PostFormArray("order")
-
-		for _, v := range OrderJson {
-			_, errQuery := db.Exec("INSERT INTO orderdetail (pizza_id, quantity) values (?,?)",
-				v,
-				v,
-			)
-			fmt.Println(v)
-			var rod model.OrderDetailResponse
-			if errQuery == nil {
-				rod.Message = "Insert Order Success"
-				sendSuccessOrderDetailresponse(c, rod)
-			} else {
-				rod.Message = "Insert Order Failed Error"
-				fmt.Print(errQuery)
-				sendSuccessOrderDetailresponse(c, rod)
-			}
-		}
+	var response model.OrderResponse
+	if errQuery == nil {
+		response.Message = "Insert Order Success"
+		response.DataOrder = GetDataResponse(strconv.Itoa(ID), c)
+		sendSuccessresponse(c, response)
+	} else {
+		response.Message = "Insert Order Failed"
+		fmt.Print(errQuery)
+		sendSuccessresponse(c, response)
 	}
 }
 
