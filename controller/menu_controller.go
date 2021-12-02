@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"log"
-	"net/http"
 	"strconv"
 
 	model "pd-backend/model"
@@ -15,7 +14,7 @@ func GetAllMenus(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	query := "SELECT * FROM menus"
+	query := "SELECT * FROM pizza"
 
 	nama := c.Query("nama")
 	if nama != "" {
@@ -59,7 +58,7 @@ func InsertMenu(c *gin.Context) {
 	gambar := c.PostForm("gambar")
 	varian := c.PostForm("varian")
 
-	_, errQuery := db.Exec("INSERT INTO menus(nama, deskripsi, harga, gambar, varian) values (?,?,?,?,?)",
+	_, errQuery := db.Exec("INSERT INTO pizza(nama, deskripsi, harga, gambar, varian) values (?,?,?,?,?)",
 		nama,
 		deskripsi,
 		harga,
@@ -88,7 +87,7 @@ func UpdateMenu(c *gin.Context) {
 	gambar := c.PostForm("gambar")
 	menuId := c.Param("menu_id")
 
-	rows, _ := db.Query("SELECT * FROM menus WHERE id='" + menuId + "'")
+	rows, _ := db.Query("SELECT * FROM pizza WHERE id='" + menuId + "'")
 	var menu model.Menu
 	for rows.Next() {
 		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar); err != nil {
@@ -113,7 +112,7 @@ func UpdateMenu(c *gin.Context) {
 		gambar = menu.Gambar
 	}
 
-	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, WHERE id=?",
+	_, errQuery := db.Exec("UPDATE pizza SET nama = ?, harga = ?, WHERE id=?",
 		nama,
 		harga,
 		menuId,
@@ -148,12 +147,4 @@ func DeleteMenu(c *gin.Context) {
 		response.Message = "Delete Menu Failed Error"
 		sendMenuErrorResponse(c, response)
 	}
-}
-
-func sendMenuSuccessresponse(c *gin.Context, ur model.MenuResponse) {
-	c.JSON(http.StatusOK, ur)
-}
-
-func sendMenuErrorResponse(c *gin.Context, ur model.MenuResponse) {
-	c.JSON(http.StatusBadRequest, ur)
 }

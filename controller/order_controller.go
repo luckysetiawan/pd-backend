@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -167,7 +166,7 @@ func InsertOrder(c *gin.Context) {
 	quantityArr := strings.Split(quantity, ",")
 
 	for i := 0; i < len(pizzaArr); i++ {
-		db.Exec("INSERT INTO orderdetail (pizza_id , quantity) values (?,?)",
+		db.Exec("INSERT INTO orderdetail (pizza_id, quantity) values (?,?)",
 			pizzaArr[i],
 			quantityArr[i],
 		)
@@ -302,28 +301,4 @@ func DeleteOrder(c *gin.Context) {
 		fmt.Print(errQuery)
 		sendErrorResponse(c, response)
 	}
-}
-
-func sendSuccessresponse(c *gin.Context, or model.OrderResponse) {
-	c.JSON(http.StatusOK, or)
-}
-
-func sendErrorResponse(c *gin.Context, or model.OrderResponse) {
-	c.JSON(http.StatusBadRequest, or)
-}
-
-func sendSuccessCustomerresponse(c *gin.Context, or model.CustomerResponse) {
-	c.JSON(http.StatusOK, or)
-}
-
-func sendErrorCustomerResponse(c *gin.Context, or model.CustomerResponse) {
-	c.JSON(http.StatusBadRequest, or)
-}
-
-func sendSuccessOrderDetailresponse(c *gin.Context, or model.OrderDetailResponse) {
-	c.JSON(http.StatusOK, or)
-}
-
-func sendErrorOrderDetailResponse(c *gin.Context, or model.OrderDetailResponse) {
-	c.JSON(http.StatusBadRequest, or)
 }
