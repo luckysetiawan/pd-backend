@@ -3,8 +3,8 @@ package controllers
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	model "pd-backend/model"
@@ -17,7 +17,7 @@ func GetAllOrders(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	query := "SELECT * FROM `order` o JOIN users u on o.idCustomer=u.id JOIN OrderDetail od ON o.idOrderDetail=od.id JOIN payment p on o.invoice=p.invoice;"
+	query := "SELECT * FROM `order`;"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -26,39 +26,25 @@ func GetAllOrders(c *gin.Context) {
 
 	var order model.Order
 	var orders []model.Order
-	var user model.User
-	var users []model.User
-	var orderDetail model.OrderDetail
-	var orderDetails []model.OrderDetail
-	var payment model.Payment
-	var payments []model.Payment
+
 	for rows.Next() {
-		if err := rows.Scan(&order.ID, &order.IdCustomer, &order.IdOrderDetail, &order.Invoice,
-			&order.Waktu, &order.Alamat, &order.Status, &user.ID, &user.Nama, &user.Email, &user.NoTelp, &user.Password,
-			&orderDetail.ID, &orderDetail.Menu, &orderDetail.Rating,
-			&orderDetail.Quantity, &orderDetail.TotalPesanan,
-			&payment.Invoice, &payment.StatusPembayaran, &payment.TotalHarga); err != nil {
+		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
+			&order.Alamat, &order.Status, &order.Rating); err != nil {
 			log.Fatal(err.Error)
 		} else {
 			orders = append(orders, order)
-			users = append(users, user)
-			orderDetails = append(orderDetails, orderDetail)
-			payments = append(payments, payment)
 		}
 	}
 
-	var OrderFullResponse model.OrderFullResponse
+	var Response model.OrderResponse
 	if err == nil {
-		OrderFullResponse.Message = "Get Order Success"
-		OrderFullResponse.DataOrder = orders
-		OrderFullResponse.DataUser = users
-		OrderFullResponse.DataOrderDetail = orderDetails
-		OrderFullResponse.DataPayment = payments
-		sendFullOrderSuccessresponse(c, OrderFullResponse)
+		Response.Message = "Get Order Success"
+		Response.DataOrder = orders
+		sendSuccessresponse(c, Response)
 	} else {
-		OrderFullResponse.Message = "Get Order Query Error"
+		Response.Message = "Get Order Query Error"
 		fmt.Print(err)
-		sendFullOrderErrorResponse(c, OrderFullResponse)
+		sendSuccessresponse(c, Response)
 	}
 }
 
@@ -79,8 +65,8 @@ func GetOrder(c *gin.Context) {
 	var order model.Order
 	var orders []model.Order
 	for rows.Next() {
-		if err := rows.Scan(&order.ID, &order.IdCustomer, &order.IdOrderDetail, &order.Invoice,
-			&order.Waktu, &order.Alamat, &order.Status); err != nil {
+		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
+			&order.Alamat, &order.Status, &order.Rating); err != nil {
 			log.Fatal(err.Error)
 		} else {
 			orders = append(orders, order)
@@ -91,11 +77,11 @@ func GetOrder(c *gin.Context) {
 	if err == nil {
 		Response.Message = "Get Order Success"
 		Response.DataOrder = orders
-		sendOrderSuccessresponse(c, Response)
+		sendSuccessresponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
 		fmt.Print(err)
-		sendOrderErrorResponse(c, Response)
+		sendSuccessresponse(c, Response)
 	}
 }
 
@@ -126,11 +112,11 @@ func GetStatus(c *gin.Context) {
 	if err == nil {
 		Response.Message = "Get Order Success"
 		Response.DataOrder = orders
-		sendOrderSuccessresponse(c, Response)
+		sendSuccessresponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
 		fmt.Print(err)
-		sendOrderErrorResponse(c, Response)
+		sendSuccessresponse(c, Response)
 	}
 }
 
@@ -149,8 +135,8 @@ func GetDataResponse(ID string, c *gin.Context) []model.Order {
 	var order model.Order
 	var orders []model.Order
 	for rows.Next() {
-		if err := rows.Scan(&order.ID, &order.IdCustomer, &order.IdOrderDetail, &order.Invoice,
-			&order.Waktu, &order.Alamat, &order.Status); err != nil {
+		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
+			&order.Alamat, &order.Status, &order.Rating); err != nil {
 			log.Fatal(err.Error)
 		} else {
 			orders = append(orders, order)
@@ -164,32 +150,69 @@ func InsertOrder(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
+	CustomerEmail := c.PostForm("customer_email")
+	Nama := c.PostForm("nama")
+	NoTelp := c.PostForm("no_telp")
+
+	db.Exec("INSERT INTO customer (email, nama, no_telp) values (?,?,?)",
+		CustomerEmail,
+		Nama,
+		NoTelp,
+	)
+
+	Pizza := c.PostForm("pizza_id")
+	quantity := c.PostForm("quantity")
+	pizzaArr := strings.Split(Pizza, ",")
+	quantityArr := strings.Split(quantity, ",")
+
+	for i := 0; i < len(pizzaArr); i++ {
+		db.Exec("INSERT INTO orderdetail (pizza_id, quantity) values (?,?)",
+			pizzaArr[i],
+			quantityArr[i],
+		)
+
+	}
+
 	ID, _ := strconv.Atoi(c.PostForm("id"))
-	IdCustomer, _ := strconv.Atoi(c.PostForm("idCustomer"))
-	IdOrderDetail, _ := strconv.Atoi(c.PostForm("idOrderDetail"))
-	Invoice := "P-" + string(time.Now().Format("2006-01-02 15:04"))
 	Waktu := time.Now()
 	Alamat := c.PostForm("alamat")
 	Status, _ := strconv.Atoi("0")
-	_, errQuery := db.Exec("INSERT INTO `order`(id, idCustomer, idOrderDetail, invoice, waktu, alamat, status) values (?,?,?,?,?,?,?)",
+	Rating, _ := strconv.Atoi(c.PostForm("rating"))
+	_, errQuery := db.Exec("INSERT INTO `order`(id, customer_email, waktu, alamat, status, rating) values (?,?,?,?,?,?)",
 		ID,
-		IdCustomer,
-		IdOrderDetail,
-		Invoice,
+		CustomerEmail,
 		Waktu,
 		Alamat,
 		Status,
+		Rating,
 	)
+
+	// var orderID model.Order
+	// if c.PostForm("id") == "" {
+	// 	getID, errID := db.Query("SELECT id FROM `order` WHERE waktu=" + time.Now() + ";")
+	// 	if err := getID.Scan(&orderID.ID); errID != nil {
+	// 		log.Fatal(err.Error)
+	// 		log.Println(err.Error)
+	// 		fmt.Println(ID)
+	// 	}
+	// } else {
+	// 	orderID.ID = ID
+	// }
+
+	// _, errQuery := db.Exec("INSERT INTO payment(order_id,customer_email, status_pembayaran) values (?,?,0)",
+	// 	orderID,
+	// 	CustomerEmail,
+	// )
 
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Insert Order Success"
 		response.DataOrder = GetDataResponse(strconv.Itoa(ID), c)
-		sendOrderSuccessresponse(c, response)
+		sendSuccessresponse(c, response)
 	} else {
-		response.Message = "Insert Order Failed Error"
+		response.Message = "Insert Order Failed"
 		fmt.Print(errQuery)
-		sendOrderErrorResponse(c, response)
+		sendSuccessresponse(c, response)
 	}
 }
 
@@ -199,17 +222,17 @@ func UpdateOrder(c *gin.Context) {
 	defer db.Close()
 
 	ID := c.Param("order_id")
-	IdCustomer := c.PostForm("idCustomer")
-	IdOrderDetail := c.PostForm("idOrderDetail")
-	Invoice := c.PostForm("invoice")
+	CustomerEmail := c.PostForm("customer_email")
 	Waktu := c.PostForm("waktu")
 	Alamat := c.PostForm("alamat")
 	Status := c.PostForm("status")
+	Rating := c.PostForm("rating")
 
 	rows, _ := db.Query("SELECT * FROM `order` WHERE id='" + ID + "'")
 	var order model.Order
 	for rows.Next() {
-		if err := rows.Scan(&order.ID, &order.IdCustomer, &order.IdOrderDetail, &order.Invoice, &order.Waktu, &order.Alamat, &order.Status); err != nil {
+		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
+			&order.Alamat, &order.Status, &order.Rating); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -219,16 +242,8 @@ func UpdateOrder(c *gin.Context) {
 		ID = strconv.Itoa(order.ID)
 	}
 
-	if IdCustomer == "" {
-		IdCustomer = strconv.Itoa(order.IdCustomer)
-	}
-
-	if IdOrderDetail == "" {
-		IdOrderDetail = strconv.Itoa(order.IdOrderDetail)
-	}
-
-	if Invoice == "" {
-		Invoice = order.Invoice
+	if CustomerEmail == "" {
+		CustomerEmail = order.CustomerEmail
 	}
 
 	if Waktu == "" {
@@ -242,13 +257,15 @@ func UpdateOrder(c *gin.Context) {
 	if Status == "" {
 		Status = strconv.Itoa(order.Status)
 	}
-	_, errQuery := db.Exec("UPDATE `order` SET idCustomer = ?, idOrderDetail = ?, invoice = ?, Waktu = ?, Alamat = ?, Status = ? WHERE id=?",
-		IdCustomer,
-		IdOrderDetail,
-		Invoice,
+	if Rating == "" {
+		Rating = strconv.Itoa(order.Rating)
+	}
+	_, errQuery := db.Exec("UPDATE `order` SET customer_email = ?, waktu = ?, alamat = ?, status = ?, rating = ? WHERE id=?",
+		CustomerEmail,
 		Waktu,
 		Alamat,
 		Status,
+		Rating,
 		ID,
 	)
 
@@ -256,11 +273,11 @@ func UpdateOrder(c *gin.Context) {
 	if errQuery == nil {
 		response.Message = "Update Order Success"
 		response.DataOrder = GetDataResponse(ID, c)
-		sendOrderSuccessresponse(c, response)
+		sendSuccessresponse(c, response)
 	} else {
 		response.Message = "Update Order Failed Error"
 		fmt.Print(errQuery)
-		sendOrderErrorResponse(c, response)
+		sendSuccessresponse(c, response)
 	}
 }
 
@@ -278,26 +295,10 @@ func DeleteOrder(c *gin.Context) {
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Delete Order Success"
-		sendOrderSuccessresponse(c, response)
+		sendSuccessresponse(c, response)
 	} else {
 		response.Message = "Delete Order Failed Error"
 		fmt.Print(errQuery)
-		sendOrderErrorResponse(c, response)
+		sendErrorResponse(c, response)
 	}
-}
-
-func sendOrderSuccessresponse(c *gin.Context, or model.OrderResponse) {
-	c.JSON(http.StatusOK, or)
-}
-
-func sendFullOrderSuccessresponse(c *gin.Context, or model.OrderFullResponse) {
-	c.JSON(http.StatusOK, or)
-}
-
-func sendOrderErrorResponse(c *gin.Context, or model.OrderResponse) {
-	c.JSON(http.StatusBadRequest, or)
-}
-
-func sendFullOrderErrorResponse(c *gin.Context, or model.OrderFullResponse) {
-	c.JSON(http.StatusBadRequest, or)
 }

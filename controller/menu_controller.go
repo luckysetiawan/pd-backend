@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"log"
-	"net/http"
 	"strconv"
 
 	model "pd-backend/model"
@@ -15,7 +14,7 @@ func GetAllMenus(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	query := "SELECT * FROM menus"
+	query := "SELECT * FROM pizza"
 
 	nama := c.Query("nama")
 	if nama != "" {
@@ -30,7 +29,7 @@ func GetAllMenus(c *gin.Context) {
 	var menu model.Menu
 	var menus []model.Menu
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
+		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar); err != nil {
 			log.Fatal(err.Error())
 		} else {
 			menus = append(menus, menu)
@@ -59,7 +58,7 @@ func InsertMenu(c *gin.Context) {
 	gambar := c.PostForm("gambar")
 	varian := c.PostForm("varian")
 
-	_, errQuery := db.Exec("INSERT INTO menus(nama, deskripsi, harga, gambar, varian) values (?,?,?,?,?)",
+	_, errQuery := db.Exec("INSERT INTO pizza(nama, deskripsi, harga, gambar, varian) values (?,?,?,?,?)",
 		nama,
 		deskripsi,
 		harga,
@@ -86,13 +85,12 @@ func UpdateMenu(c *gin.Context) {
 	deskripsi := c.PostForm("deskripsi")
 	harga, _ := strconv.Atoi(c.PostForm("harga"))
 	gambar := c.PostForm("gambar")
-	varian := c.PostForm("varian")
 	menuId := c.Param("menu_id")
 
-	rows, _ := db.Query("SELECT * FROM menus WHERE id='" + menuId + "'")
+	rows, _ := db.Query("SELECT * FROM pizza WHERE id='" + menuId + "'")
 	var menu model.Menu
 	for rows.Next() {
-		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar, &menu.Varian); err != nil {
+		if err := rows.Scan(&menu.ID, &menu.Nama, &menu.Deskripsi, &menu.Harga, &menu.Gambar); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -114,14 +112,9 @@ func UpdateMenu(c *gin.Context) {
 		gambar = menu.Gambar
 	}
 
-	if varian == "" {
-		varian = menu.Varian
-	}
-
-	_, errQuery := db.Exec("UPDATE menus SET nama = ?, harga = ?, varian = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE pizza SET nama = ?, harga = ?, WHERE id=?",
 		nama,
 		harga,
-		varian,
 		menuId,
 	)
 
@@ -154,12 +147,4 @@ func DeleteMenu(c *gin.Context) {
 		response.Message = "Delete Menu Failed Error"
 		sendMenuErrorResponse(c, response)
 	}
-}
-
-func sendMenuSuccessresponse(c *gin.Context, ur model.MenuResponse) {
-	c.JSON(http.StatusOK, ur)
-}
-
-func sendMenuErrorResponse(c *gin.Context, ur model.MenuResponse) {
-	c.JSON(http.StatusBadRequest, ur)
 }

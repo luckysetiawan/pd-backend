@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"log"
-	"net/http"
 
 	model "pd-backend/model"
 
@@ -158,7 +157,7 @@ func Login(c *gin.Context) {
 
 	var user model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.Password, &user.NoTelp); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.Password, &user.NoTelp, &user.Position); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -183,12 +182,4 @@ func Logout(c *gin.Context) {
 	var response model.UserResponse
 	response.Message = "Logout Success"
 	sendUserSuccessresponse(c, response)
-}
-
-func sendUserSuccessresponse(c *gin.Context, ur model.UserResponse) {
-	c.JSON(http.StatusOK, ur)
-}
-
-func sendUserErrorResponse(c *gin.Context, ur model.UserResponse) {
-	c.JSON(http.StatusBadRequest, ur)
 }
