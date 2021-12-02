@@ -31,6 +31,11 @@ func main() {
 	// User Registration
 	router.POST("/registrasi", controllers.Registrasi)
 
+	// Login untuk Staff
+	router.POST("/login", controllers.Login)
+	// Logout untuk Staff
+	router.GET("/logout", controllers.Logout)
+
 	// User
 	user := router.Group("/user")
 	{
@@ -43,11 +48,6 @@ func main() {
 	// Admin
 	admin := router.Group("/admin")
 	{
-		// Login Staff
-		admin.POST("/login", controllers.Login)
-		// Logout Staff
-		admin.GET("/logout", controllers.Logout)
-
 		// Melihat seluruh member
 		admin.GET("/alluser", controllers.GetAllUsers)
 		// Mengubah data user
@@ -60,6 +60,11 @@ func main() {
 		admin.PUT("/menu/:menu_id", controllers.UpdateMenu)
 		// Menghapus menu
 		admin.DELETE("/deletemenu/:menu_id", controllers.DeleteMenu)
+
+		// Melihat seluruh payment
+		admin.GET("/payments", controllers.GetAllPayments)
+		// Melihat seluruh payment
+		admin.GET("/payments-period", controllers.GetPaymentForPeriod)
 	}
 
 	//Order
