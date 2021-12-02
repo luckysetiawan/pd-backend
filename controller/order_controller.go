@@ -40,11 +40,11 @@ func GetAllOrders(c *gin.Context) {
 	if err == nil {
 		Response.Message = "Get Order Success"
 		Response.DataOrder = orders
-		sendSuccessresponse(c, Response)
+		sendOrderSuccessResponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
 		fmt.Print(err)
-		sendSuccessresponse(c, Response)
+		sendOrderErrorOResponse(c, Response)
 	}
 }
 
@@ -77,11 +77,11 @@ func GetOrder(c *gin.Context) {
 	if err == nil {
 		Response.Message = "Get Order Success"
 		Response.DataOrder = orders
-		sendSuccessresponse(c, Response)
+		sendOrderSuccessResponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
 		fmt.Print(err)
-		sendSuccessresponse(c, Response)
+		sendOrderErrorOResponse(c, Response)
 	}
 }
 
@@ -100,23 +100,27 @@ func GetStatus(c *gin.Context) {
 	}
 
 	var order model.Order
-	var orders []model.Order
 	for rows.Next() {
 		if err := rows.Scan(&order.Status); err != nil {
 			log.Fatal(err.Error)
 		}
-		orders = append(orders, order)
 	}
 
-	var Response model.OrderResponse
+	// var order model.Order
+	// if err := rows.Scan(&order.Status); err != nil {
+	// 	log.Fatal(err.Error)
+	// }
+
+	var Response model.StatusResponse
 	if err == nil {
 		Response.Message = "Get Order Success"
-		Response.DataOrder = orders
-		sendSuccessresponse(c, Response)
+		Response.Status = order.Status
+		sendStatusSuccessResponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
-		fmt.Print(err)
-		sendSuccessresponse(c, Response)
+		fmt.Print(err.Error())
+		log.Fatal(err.Error())
+		sendStatusErrorResponse(c, Response)
 	}
 }
 
@@ -208,11 +212,11 @@ func InsertOrder(c *gin.Context) {
 	if errQuery == nil {
 		response.Message = "Insert Order Success"
 		response.DataOrder = GetDataResponse(strconv.Itoa(ID), c)
-		sendSuccessresponse(c, response)
+		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Insert Order Failed"
 		fmt.Print(errQuery)
-		sendSuccessresponse(c, response)
+		sendOrderErrorOResponse(c, response)
 	}
 }
 
@@ -273,11 +277,11 @@ func UpdateOrder(c *gin.Context) {
 	if errQuery == nil {
 		response.Message = "Update Order Success"
 		response.DataOrder = GetDataResponse(ID, c)
-		sendSuccessresponse(c, response)
+		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Update Order Failed Error"
 		fmt.Print(errQuery)
-		sendSuccessresponse(c, response)
+		sendOrderErrorOResponse(c, response)
 	}
 }
 
@@ -295,10 +299,10 @@ func DeleteOrder(c *gin.Context) {
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Delete Order Success"
-		sendSuccessresponse(c, response)
+		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Delete Order Failed Error"
 		fmt.Print(errQuery)
-		sendErrorResponse(c, response)
+		sendOrderErrorOResponse(c, response)
 	}
 }

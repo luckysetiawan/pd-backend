@@ -43,27 +43,19 @@ func sendGetPendapatanPeriodErrorResponse(c *gin.Context, pr model.PendapatanRes
 }
 
 // Order Response
-func sendSuccessCustomerresponse(c *gin.Context, or model.CustomerResponse) {
+
+func sendOrderSuccessResponse(c *gin.Context, or model.OrderResponse) {
 	c.JSON(http.StatusOK, or)
 }
 
-func sendErrorCustomerResponse(c *gin.Context, or model.CustomerResponse) {
+func sendOrderErrorOResponse(c *gin.Context, or model.OrderResponse) {
 	c.JSON(http.StatusBadRequest, or)
 }
 
-func sendSuccessOrderDetailresponse(c *gin.Context, or model.OrderDetailResponse) {
+func sendStatusSuccessResponse(c *gin.Context, or model.StatusResponse) {
 	c.JSON(http.StatusOK, or)
 }
 
-func sendErrorOrderDetailResponse(c *gin.Context, or model.OrderDetailResponse) {
-	c.JSON(http.StatusBadRequest, or)
-}
-
-// General Response
-func sendSuccessresponse(c *gin.Context, or model.OrderResponse) {
-	c.JSON(http.StatusOK, or)
-}
-
-func sendErrorResponse(c *gin.Context, or model.OrderResponse) {
+func sendStatusErrorResponse(c *gin.Context, or model.StatusResponse) {
 	c.JSON(http.StatusBadRequest, or)
 }

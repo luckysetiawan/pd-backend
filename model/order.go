@@ -14,6 +14,11 @@ type OrderResponse struct {
 	DataOrder []Order `form:"dataOrder" json:"dataOrder"`
 }
 
+type StatusResponse struct {
+	Message string `form:"message" json:"message"`
+	Status  int    `form:"status" json:"status"`
+}
+
 // type OrderFullResponse struct {
 // 	Message         string        `form:"message" json:"message"`
 // 	DataOrder       []Order       `form:"dataOrder" json:"dataOrder"`
