@@ -167,7 +167,7 @@ func InsertOrder(c *gin.Context) {
 	quantityArr := strings.Split(quantity, ",")
 
 	for i := 0; i < len(pizzaArr); i++ {
-		db.Exec("INSERT INTO orderdetail (pizza_id, quantity) values (?,?)",
+		db.Exec("INSERT INTO orderdetail (pizza_id , quantity) values (?,?)",
 			pizzaArr[i],
 			quantityArr[i],
 		)
