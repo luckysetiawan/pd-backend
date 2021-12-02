@@ -29,7 +29,10 @@ func main() {
 	}))
 
 	// User Registration
-	router.POST("/registrasi", controllers.Registrasi)
+	// router.POST("/registrasi", controllers.Registrasi)
+
+	// Melihat seluruh menu
+	router.GET("/menu", controllers.GetAllMenus)
 
 	// Login untuk Staff
 	router.POST("/login", controllers.Login)
@@ -40,9 +43,7 @@ func main() {
 	user := router.Group("/user")
 	{
 		// Update profile user
-		user.PUT("/update/:user_id", controllers.UpdateUser)
-		// Melihat seluruh menu
-		user.GET("/menu", controllers.GetAllMenus)
+		user.PUT("/:user_id", controllers.UpdateUser)
 	}
 
 	// Admin
@@ -51,19 +52,19 @@ func main() {
 		// Melihat seluruh member
 		admin.GET("/alluser", controllers.GetAllUsers)
 		// Mengubah data user
-		admin.PUT("/updateuser/:user_id", controllers.UpdateUser)
+		admin.PUT("/:user_id", controllers.UpdateUser)
 		// Menghapus member
-		admin.DELETE("/deleteuser/:user_id", controllers.DeleteUser)
+		admin.DELETE("/:user_id", controllers.DeleteUser)
 		// Menambahkan menu baru
 		admin.POST("/menu", controllers.InsertMenu)
 		// Mengubah data menu berdasarkan ID
 		admin.PUT("/menu/:menu_id", controllers.UpdateMenu)
 		// Menghapus menu
-		admin.DELETE("/deletemenu/:menu_id", controllers.DeleteMenu)
+		admin.DELETE("/:menu_id", controllers.DeleteMenu)
 
 		// Melihat seluruh payment
 		admin.GET("/payments", controllers.GetAllPayments)
-		// Melihat seluruh payment
+		// Melihat pendapatan suatu periode
 		admin.GET("/payments-period", controllers.GetPaymentForPeriod)
 	}
 
