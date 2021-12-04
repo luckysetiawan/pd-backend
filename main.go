@@ -28,9 +28,6 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	// User Registration
-	// router.POST("/registrasi", controllers.Registrasi)
-
 	// Melihat seluruh menu
 	router.GET("/menu", controllers.GetAllMenus)
 
@@ -50,7 +47,7 @@ func main() {
 	admin := router.Group("/admin")
 	{
 		// Melihat seluruh member
-		admin.GET("/alluser", controllers.GetAllUsers)
+		admin.GET("/users", controllers.GetAllUsers)
 		// Mengubah data user
 		admin.PUT("/:user_id", controllers.UpdateUser)
 		// Menghapus member
@@ -60,15 +57,17 @@ func main() {
 		// Mengubah data menu berdasarkan ID
 		admin.PUT("/menu/:menu_id", controllers.UpdateMenu)
 		// Menghapus menu
-		admin.DELETE("/:menu_id", controllers.DeleteMenu)
+		admin.DELETE("/menu/:menu_id", controllers.DeleteMenu)
 
 		// Melihat seluruh payment
 		admin.GET("/payments", controllers.GetAllPayments)
 		// Melihat pendapatan suatu periode
 		admin.GET("/payments-period", controllers.GetPaymentForPeriod)
+		// Melihat total pizza terjual suatu periode
+		admin.GET("/pizza-sold-period", controllers.GetPizzaQuantityForPeriod)
 	}
 
-	//Order
+	// Order
 	order := router.Group("/order")
 	{
 		// Melihat seluruh order
@@ -83,6 +82,13 @@ func main() {
 		order.PUT("/:order_id", controllers.UpdateOrder)
 		// Delete order
 		order.DELETE("/:order_id", controllers.DeleteOrder)
+	}
+
+	// Payment
+	payment := router.Group("/payment")
+	{
+		// Update payment status menjadi 1 (0=belum dibayar, 1=dibayar)
+		payment.PUT("/:order_id", controllers.UpdatePaymentStatus)
 	}
 
 	router.Run(":8080")

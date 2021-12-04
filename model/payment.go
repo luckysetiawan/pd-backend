@@ -17,3 +17,8 @@ type PendapatanResponse struct {
 	Message string `form:"message" json:"message"`
 	Total   int    `form:"total" json:"total"`
 }
+
+type PizzaTerjualResponse struct {
+	Message string `form:"message" json:"message"`
+	Total   int    `form:"total" json:"total"`
+}

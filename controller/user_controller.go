@@ -28,7 +28,7 @@ func GetAllUsers(c *gin.Context) {
 	var user model.User
 	var users []model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.Password, &user.NoTelp, &user.Position); err != nil {
 			log.Fatal(err.Error())
 		} else {
 			users = append(users, user)
@@ -46,31 +46,6 @@ func GetAllUsers(c *gin.Context) {
 	}
 }
 
-// Insert User
-func Registrasi(c *gin.Context) {
-	db := connect()
-	defer db.Close()
-
-	nama := c.PostForm("nama")
-	email := c.PostForm("email")
-	notelp := c.PostForm("notelp")
-
-	_, errQuery := db.Exec("INSERT INTO users(nama, email, notelp) values (?,?,?)",
-		nama,
-		email,
-		notelp,
-	)
-
-	var response model.UserResponse
-	if errQuery == nil {
-		response.Message = "Insert User Success"
-		sendUserSuccessresponse(c, response)
-	} else {
-		response.Message = "Insert User Failed Error"
-		sendUserErrorResponse(c, response)
-	}
-}
-
 // Update User
 func UpdateUser(c *gin.Context) {
 	db := connect()
@@ -78,13 +53,13 @@ func UpdateUser(c *gin.Context) {
 
 	nama := c.PostForm("nama")
 	email := c.PostForm("email")
-	notelp := c.PostForm("notelp")
+	no_telp := c.PostForm("no_telp")
 	userId := c.Param("user_id")
 
 	rows, _ := db.Query("SELECT * FROM users WHERE id='" + userId + "'")
 	var user model.User
 	for rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.NoTelp); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nama, &user.Email, &user.Password, &user.NoTelp, &user.Position); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -98,14 +73,14 @@ func UpdateUser(c *gin.Context) {
 		email = user.Email
 	}
 
-	if notelp == "" {
-		notelp = user.NoTelp
+	if no_telp == "" {
+		no_telp = user.NoTelp
 	}
 
-	_, errQuery := db.Exec("UPDATE users SET nama = ?, email = ?, notelp = ? WHERE id=?",
+	_, errQuery := db.Exec("UPDATE users SET nama = ?, email = ?, no_telp = ? WHERE id=?",
 		nama,
 		email,
-		notelp,
+		no_telp,
 		userId,
 	)
 

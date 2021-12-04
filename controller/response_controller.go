@@ -42,6 +42,14 @@ func sendGetPendapatanPeriodErrorResponse(c *gin.Context, pr model.PendapatanRes
 	c.JSON(http.StatusBadRequest, pr)
 }
 
+func sendGetPizzaTerjualPeriodSuccessResponse(c *gin.Context, pr model.PizzaTerjualResponse) {
+	c.JSON(http.StatusOK, pr)
+}
+
+func sendGetPizzaTerjualPeriodErrorResponse(c *gin.Context, pr model.PizzaTerjualResponse) {
+	c.JSON(http.StatusBadRequest, pr)
+}
+
 // Order Response
 
 func sendOrderSuccessResponse(c *gin.Context, or model.OrderResponse) {
