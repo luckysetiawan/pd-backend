@@ -51,7 +51,6 @@ func sendGetPizzaTerjualPeriodErrorResponse(c *gin.Context, pr model.PizzaTerjua
 }
 
 // Order Response
-
 func sendOrderSuccessResponse(c *gin.Context, or model.OrderResponse) {
 	c.JSON(http.StatusOK, or)
 }
@@ -66,4 +65,21 @@ func sendStatusSuccessResponse(c *gin.Context, or model.StatusResponse) {
 
 func sendStatusErrorResponse(c *gin.Context, or model.StatusResponse) {
 	c.JSON(http.StatusBadRequest, or)
+}
+
+func sendActiveOrderSuccessResponse(c *gin.Context, or model.ActiveOrderResponse) {
+	c.JSON(http.StatusOK, or)
+}
+
+func sendActiveOrderErrorResponse(c *gin.Context, or model.ActiveOrderResponse) {
+	c.JSON(http.StatusBadRequest, or)
+}
+
+// Histories
+func sendHistorySuccessResponse(c *gin.Context, tr model.TransactionResponse) {
+	c.JSON(http.StatusOK, tr)
+}
+
+func sendHistoryErrorResponse(c *gin.Context, tr model.TransactionResponse) {
+	c.JSON(http.StatusBadRequest, tr)
 }

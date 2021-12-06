@@ -71,13 +71,12 @@ func GetPaymentForPeriod(c *gin.Context) {
 		month = string(payments[i].WaktuPembayaran[5])
 		month += string(payments[i].WaktuPembayaran[6])
 
-		fmt.Println(month)
-		fmt.Println(payments[i].TotalPembayaran)
+		// fmt.Println(month)
+		// fmt.Println(payments[i].TotalPembayaran)
 
 		if period == month {
 			totalPendapatan += payments[i].TotalPembayaran
-			fmt.Println("here")
-			fmt.Println(totalPendapatan)
+			// fmt.Println(totalPendapatan)
 		}
 
 	}

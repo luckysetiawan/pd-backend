@@ -60,7 +60,8 @@ func main() {
 		admin.DELETE("/menu/:menu_id", controllers.DeleteMenu)
 
 		// Melihat seluruh payment
-		admin.GET("/payments", controllers.GetAllPayments)
+		// admin.GET("/payments", controllers.GetAllPayments)
+
 		// Melihat pendapatan suatu periode
 		admin.GET("/payments-period", controllers.GetPaymentForPeriod)
 		// Melihat total pizza terjual suatu periode
@@ -82,6 +83,19 @@ func main() {
 		order.PUT("/:order_id", controllers.UpdateOrder)
 		// Delete order
 		order.DELETE("/:order_id", controllers.DeleteOrder)
+
+		// Melihat order yang aktif/dimasak (chef)
+		order.GET("/active-orders", controllers.GetActiveOrders)
+	}
+
+	transaction := router.Group("/transaction")
+	{
+		// Menampilkan transaksi yang telah selesai
+		transaction.GET("/all", controllers.GetAllTransaction)
+		// Menampilkan transaksi yang telah selesai berdasarkan pizza
+		transaction.GET("/pizza", controllers.GetTransactionByPizza)
+		// Menampilkan transaksi yang telah selesai berdasarkan tanggal
+		transaction.GET("/date", controllers.GetTransactionByDate)
 	}
 
 	// Payment

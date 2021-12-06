@@ -19,6 +19,12 @@ type StatusResponse struct {
 	Status  int    `form:"status" json:"status"`
 }
 
+type ActiveOrderResponse struct {
+	Message     string        `form:"message" json:"message"`
+	ActiveOrder []Order       `form:"activeOrder" json:"activeOrder"`
+	DetailOrder []OrderDetail `form:"detailOrder" json:"detailOrder"`
+}
+
 // type OrderFullResponse struct {
 // 	Message         string        `form:"message" json:"message"`
 // 	DataOrder       []Order       `form:"dataOrder" json:"dataOrder"`

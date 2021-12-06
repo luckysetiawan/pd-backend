@@ -30,7 +30,7 @@ func GetAllOrders(c *gin.Context) {
 	for rows.Next() {
 		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
 			&order.Alamat, &order.Status, &order.Rating); err != nil {
-			log.Fatal(err.Error)
+			log.Fatal(err.Error())
 		} else {
 			orders = append(orders, order)
 		}
@@ -67,7 +67,7 @@ func GetOrder(c *gin.Context) {
 	for rows.Next() {
 		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
 			&order.Alamat, &order.Status, &order.Rating); err != nil {
-			log.Fatal(err.Error)
+			log.Fatal(err.Error())
 		} else {
 			orders = append(orders, order)
 		}
@@ -85,7 +85,67 @@ func GetOrder(c *gin.Context) {
 	}
 }
 
-// Get Orders by Id
+// Get Active Orders (status dimasak)
+func GetActiveOrders(c *gin.Context) {
+	db := connect()
+	defer db.Close()
+	fmt.Println("a")
+	query := "SELECT * FROM `order` WHERE status='0';"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var order model.Order
+	var orders []model.Order
+
+	var orderdetail model.OrderDetail
+	var orderdetails []model.OrderDetail
+
+	for rows.Next() {
+		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
+			&order.Alamat, &order.Status, &order.Rating); err != nil {
+			log.Fatal(err.Error())
+		} else {
+			orders = append(orders, order)
+
+			detailquery := "SELECT * FROM `orderdetail` WHERE order_id='" + strconv.Itoa(order.ID) + "';"
+
+			rows2, err2 := db.Query(detailquery)
+			if err2 != nil {
+				log.Println(err2)
+			}
+
+			// var orderdetail model.OrderDetail
+			// var orderdetails []model.OrderDetail
+			for rows2.Next() {
+				if err := rows2.Scan(&orderdetail.ID, &orderdetail.PizzaID, &orderdetail.OrderID, &orderdetail.Quantity, &orderdetail.TotalHarga); err != nil {
+					log.Fatal(err.Error())
+				} else {
+					orderdetails = append(orderdetails, orderdetail)
+				}
+			}
+
+		}
+	}
+
+	// query := "SELECT * FROM `orderdetail` WHERE order_id='" + order.ID + "';"
+
+	var Response model.ActiveOrderResponse
+	if err == nil {
+		Response.Message = "Get Active Order Success"
+		Response.ActiveOrder = orders
+		Response.DetailOrder = orderdetails
+		sendActiveOrderSuccessResponse(c, Response)
+	} else {
+		Response.Message = "Get Order Query Error"
+		fmt.Print(err)
+		sendActiveOrderErrorResponse(c, Response)
+	}
+}
+
+// Get Status by Id
 func GetStatus(c *gin.Context) {
 	db := connect()
 	defer db.Close()
@@ -102,7 +162,7 @@ func GetStatus(c *gin.Context) {
 	var order model.Order
 	for rows.Next() {
 		if err := rows.Scan(&order.Status); err != nil {
-			log.Fatal(err.Error)
+			log.Fatal(err.Error())
 		}
 	}
 
@@ -141,7 +201,7 @@ func GetDataResponse(ID string, c *gin.Context) []model.Order {
 	for rows.Next() {
 		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
 			&order.Alamat, &order.Status, &order.Rating); err != nil {
-			log.Fatal(err.Error)
+			log.Fatal(err.Error())
 		} else {
 			orders = append(orders, order)
 		}
@@ -164,20 +224,7 @@ func InsertOrder(c *gin.Context) {
 		NoTelp,
 	)
 
-	Pizza := c.PostForm("pizza_id")
-	quantity := c.PostForm("quantity")
-	pizzaArr := strings.Split(Pizza, ",")
-	quantityArr := strings.Split(quantity, ",")
-
-	for i := 0; i < len(pizzaArr); i++ {
-		db.Exec("INSERT INTO orderdetail (pizza_id, quantity) values (?,?)",
-			pizzaArr[i],
-			quantityArr[i],
-		)
-
-	}
-
-	ID, _ := strconv.Atoi(c.PostForm("id"))
+	ID, _ := strconv.Atoi(c.PostForm("id")) //Ini ntar nggausah biar autoincrement
 	Waktu := time.Now()
 	Alamat := c.PostForm("alamat")
 	Status, _ := strconv.Atoi("0")
@@ -190,6 +237,29 @@ func InsertOrder(c *gin.Context) {
 		Status,
 		Rating,
 	)
+
+	// GET DATA ORDER DARI DB
+
+	// NewOrder = GET ORDER
+
+	Pizza := c.PostForm("pizza_id")
+	// OrderID := c.PostForm("order_id")
+	quantity := c.PostForm("quantity")
+	pizzaArr := strings.Split(Pizza, ",")
+	quantityArr := strings.Split(quantity, ",")
+
+	//Hitung Total Harga
+
+	//Tambah Insert Total Harga
+	for i := 0; i < len(pizzaArr); i++ {
+		db.Exec("INSERT INTO orderdetail (pizza_id, order_id, quantity) values (?,?,?)",
+			pizzaArr[i],
+			ID, //ID DARI DB
+			quantityArr[i],
+			//TotalHarga,
+		)
+
+	}
 
 	// var orderID model.Order
 	// if c.PostForm("id") == "" {
