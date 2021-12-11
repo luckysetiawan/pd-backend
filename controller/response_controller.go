@@ -25,6 +25,14 @@ func sendUserErrorResponse(c *gin.Context, ur model.UserResponse) {
 	c.JSON(http.StatusBadRequest, ur)
 }
 
+func sendLoginSuccessResponse(c *gin.Context, ur model.LoginResponse) {
+	c.JSON(http.StatusOK, ur)
+}
+
+func sendLoginErrorResponse(c *gin.Context, ur model.LoginResponse) {
+	c.JSON(http.StatusBadRequest, ur)
+}
+
 // Payment Response
 func sendPaymentSuccessresponse(c *gin.Context, pr model.PaymentResponse) {
 	c.JSON(http.StatusOK, pr)
@@ -67,14 +75,6 @@ func sendStatusErrorResponse(c *gin.Context, or model.StatusResponse) {
 	c.JSON(http.StatusBadRequest, or)
 }
 
-// func sendRatingSuccessResponse(c *gin.Context, or model.RatingResponse) {
-// 	c.JSON(http.StatusOK, or)
-// }
-
-// func sendRatingErrorResponse(c *gin.Context, or model.RatingResponse) {
-// 	c.JSON(http.StatusBadRequest, or)
-// }
-
 func sendActiveOrderSuccessResponse(c *gin.Context, or model.ActiveOrderResponse) {
 	c.JSON(http.StatusOK, or)
 }
@@ -83,11 +83,11 @@ func sendActiveOrderErrorResponse(c *gin.Context, or model.ActiveOrderResponse) 
 	c.JSON(http.StatusBadRequest, or)
 }
 
-// Histories
-func sendHistorySuccessResponse(c *gin.Context, tr model.TransactionResponse) {
+// Transactions
+func sendTransactionSuccessResponse(c *gin.Context, tr model.TransactionResponse) {
 	c.JSON(http.StatusOK, tr)
 }
 
-func sendHistoryErrorResponse(c *gin.Context, tr model.TransactionResponse) {
+func sendTransactionErrorResponse(c *gin.Context, tr model.TransactionResponse) {
 	c.JSON(http.StatusBadRequest, tr)
 }

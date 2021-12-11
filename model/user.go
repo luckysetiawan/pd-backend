@@ -13,3 +13,8 @@ type UserResponse struct {
 	Message string `form:"message" json:"message"`
 	Data    []User `form:"data" json:"data"`
 }
+
+type LoginResponse struct {
+	Message string `form:"message" json:"message"`
+	Type    string `form:"userType" json:"userType"`
+}

@@ -89,59 +89,68 @@ func GetOrder(c *gin.Context) {
 func GetActiveOrders(c *gin.Context) {
 	db := connect()
 	defer db.Close()
-	fmt.Println("a")
-	query := "SELECT * FROM `order` WHERE status='0';"
+
+	query := "SELECT * FROM `order` WHERE status = 0"
 
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
 	}
 
+	var transaction model.Transaction
+	var transactions []model.Transaction
 	var order model.Order
 	var orders []model.Order
-
-	var orderdetail model.OrderDetail
 	var orderdetails []model.OrderDetail
 
-	for rows.Next() {
+	for rows.Next() { // loop order
 		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
 			&order.Alamat, &order.Status, &order.Rating); err != nil {
 			log.Fatal(err.Error())
 		} else {
-			orders = append(orders, order)
+			if order.Status == 0 {
+				orders = append(orders, order)
 
-			detailquery := "SELECT * FROM `orderdetail` WHERE order_id='" + strconv.Itoa(order.ID) + "';"
+				detailquery := "SELECT * FROM `orderdetail` WHERE order_id = '" + strconv.Itoa(order.ID) + "';"
 
-			rows2, err2 := db.Query(detailquery)
-			if err2 != nil {
-				log.Println(err2)
-			}
+				rows2, err2 := db.Query(detailquery)
+				if err2 != nil {
+					log.Println(err2)
+				}
 
-			// var orderdetail model.OrderDetail
-			// var orderdetails []model.OrderDetail
-			for rows2.Next() {
-				if err := rows2.Scan(&orderdetail.ID, &orderdetail.PizzaID, &orderdetail.OrderID, &orderdetail.Quantity, &orderdetail.TotalHarga); err != nil {
-					log.Fatal(err.Error())
-				} else {
-					orderdetails = append(orderdetails, orderdetail)
+				for rows2.Next() { // loop orderdetail
+					var orderdetail model.OrderDetail
+
+					fmt.Println(order.ID, orderdetail.OrderID)
+					if err := rows2.Scan(&orderdetail.ID, &orderdetail.PizzaID, &orderdetail.OrderID, &orderdetail.Quantity, &orderdetail.TotalHarga); err != nil {
+						log.Fatal(err.Error())
+					} else {
+						fmt.Println(orderdetail)
+						orderdetails = append(orderdetails, orderdetail)
+					}
 				}
 			}
 
+			fmt.Println()
+			fmt.Println("id", order.ID, "orderdetails", orderdetails)
+			transaction.DetailOrder = append(transaction.DetailOrder, orderdetails...)
+			orderdetails = nil
+			fmt.Println("trans", transaction.DetailOrder)
 		}
+		transaction.DataOrder = order
+		transactions = append(transactions, transaction)
+		transaction.DetailOrder = nil
 	}
 
-	// query := "SELECT * FROM `orderdetail` WHERE order_id='" + order.ID + "';"
-
-	var Response model.ActiveOrderResponse
+	var Response model.TransactionResponse
 	if err == nil {
 		Response.Message = "Get Active Order Success"
-		Response.ActiveOrder = orders
-		Response.DetailOrder = orderdetails
-		sendActiveOrderSuccessResponse(c, Response)
+		Response.Data = transactions
+		sendTransactionSuccessResponse(c, Response)
 	} else {
-		Response.Message = "Get Order Query Error"
+		Response.Message = "Get Active Order Query Error"
 		fmt.Print(err)
-		sendActiveOrderErrorResponse(c, Response)
+		sendTransactionErrorResponse(c, Response)
 	}
 }
 
@@ -150,22 +159,19 @@ func GetStatus(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	CustomerEmail := c.PostForm("customer_email")
+	ID := c.Param("order_id")
 
-	query := "SELECT status FROM `order` WHERE customer_email='" + CustomerEmail + "';"
+	query := "SELECT status FROM `order` WHERE id='" + ID + "';"
 
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
 	}
 
-	var order int
-	var orders []int
+	var order model.Order
 	for rows.Next() {
-		if err := rows.Scan(&order); err != nil {
+		if err := rows.Scan(&order.Status); err != nil {
 			log.Fatal(err.Error())
-		} else {
-			orders = append(orders, order)
 		}
 	}
 
@@ -177,7 +183,7 @@ func GetStatus(c *gin.Context) {
 	var Response model.StatusResponse
 	if err == nil {
 		Response.Message = "Get Order Success"
-		Response.Status = orders
+		Response.Status = order.Status
 		sendStatusSuccessResponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
@@ -188,11 +194,11 @@ func GetStatus(c *gin.Context) {
 }
 
 // Get Response untuk fungsi lain
-func GetDataResponse(ID string, table string, c *gin.Context) []model.Order {
+func GetDataResponse(ID string, c *gin.Context) []model.Order {
 	db := connect()
 	defer db.Close()
 
-	query := "SELECT * FROM `" + table + "` WHERE id='" + ID + "';"
+	query := "SELECT * FROM `order` WHERE id='" + ID + "';"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -217,7 +223,6 @@ func InsertOrder(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	//Insert Customer dari DB
 	CustomerEmail := c.PostForm("customer_email")
 	Nama := c.PostForm("nama")
 	NoTelp := c.PostForm("no_telp")
@@ -228,80 +233,64 @@ func InsertOrder(c *gin.Context) {
 		NoTelp,
 	)
 
+	ID, _ := strconv.Atoi(c.PostForm("id")) //Ini ntar nggausah biar autoincrement
 	Waktu := time.Now()
 	Alamat := c.PostForm("alamat")
 	Status, _ := strconv.Atoi("0")
-	_, errQuery := db.Exec("INSERT INTO `order`(customer_email, waktu, alamat, status, rating) values (?,?,?,?,0)",
+	Rating, _ := strconv.Atoi(c.PostForm("rating"))
+	_, errQuery := db.Exec("INSERT INTO `order`(id, customer_email, waktu, alamat, status, rating) values (?,?,?,?,?,?)",
+		ID,
 		CustomerEmail,
 		Waktu,
 		Alamat,
 		Status,
+		Rating,
 	)
 
-	// Get ID order dari DB
-	query := "SELECT ID FROM `order` WHERE customer_email='" + CustomerEmail + "' AND status=0;"
+	// GET DATA ORDER DARI DB
 
-	rows, err := db.Query(query)
-	if err != nil {
-		log.Println(err)
-	}
-
-	var order model.Order
-	for rows.Next() {
-		if err := rows.Scan(&order.ID); err != nil {
-			log.Fatal(err.Error())
-		}
-	}
+	// NewOrder = GET ORDER
 
 	Pizza := c.PostForm("pizza_id")
-	Quantity := c.PostForm("quantity")
-	PizzaArr := strings.Split(Pizza, ",")
-	QuantityArr := strings.Split(Quantity, ",")
-	var TotalHarga int
-	TotalPembayaran := 0
+	// OrderID := c.PostForm("order_id")
+	quantity := c.PostForm("quantity")
+	pizzaArr := strings.Split(Pizza, ",")
+	quantityArr := strings.Split(quantity, ",")
+
+	//Hitung Total Harga
+
 	//Tambah Insert Total Harga
-	for i := 0; i < len(PizzaArr); i++ {
-		//Get harga dari DB
-		query := "SELECT harga FROM pizza WHERE id=" + PizzaArr[i] + ";"
-
-		rows, err := db.Query(query)
-		if err != nil {
-			log.Println(err)
-		}
-
-		var pizza model.Menu
-		for rows.Next() {
-			if err := rows.Scan(&pizza.Harga); err != nil {
-				log.Fatal(err.Error())
-			}
-		}
-		//Perhitungan Total Harga
-		TempQuantity, _ := strconv.Atoi(QuantityArr[i])
-		TotalHarga = pizza.Harga * int(TempQuantity)
-		TotalPembayaran += TotalHarga
-		fmt.Println(TotalHarga)
-		fmt.Println(pizza.Harga)
-		fmt.Println(TempQuantity)
-		fmt.Println(TotalPembayaran)
-		//Insert total harga ke DB
-		db.Exec("INSERT INTO orderdetail (pizza_id, order_id, quantity, total_harga) values (?,?,?,?)",
-			PizzaArr[i],
-			order.ID,
-			QuantityArr[i],
-			TotalHarga,
+	for i := 0; i < len(pizzaArr); i++ {
+		db.Exec("INSERT INTO orderdetail (pizza_id, order_id, quantity) values (?,?,?)",
+			pizzaArr[i],
+			ID, //ID DARI DB
+			quantityArr[i],
+			//TotalHarga,
 		)
 
 	}
 
-	_, errQuery = db.Exec("INSERT INTO payment(order_id, status_pembayaran, total_pembayaran) values (?,0,?)",
-		order.ID,
-		TotalPembayaran,
-	)
+	// var orderID model.Order
+	// if c.PostForm("id") == "" {
+	// 	getID, errID := db.Query("SELECT id FROM `order` WHERE waktu=" + time.Now() + ";")
+	// 	if err := getID.Scan(&orderID.ID); errID != nil {
+	// 		log.Fatal(err.Error)
+	// 		log.Println(err.Error)
+	// 		fmt.Println(ID)
+	// 	}
+	// } else {
+	// 	orderID.ID = ID
+	// }
+
+	// _, errQuery := db.Exec("INSERT INTO payment(order_id,customer_email, status_pembayaran) values (?,?,0)",
+	// 	orderID,
+	// 	CustomerEmail,
+	// )
 
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Insert Order Success"
-		response.DataOrder = GetDataResponse(strconv.Itoa(order.ID), "order", c)
+		response.DataOrder = GetDataResponse(strconv.Itoa(ID), c)
 		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Insert Order Failed"
@@ -366,7 +355,7 @@ func UpdateOrder(c *gin.Context) {
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Update Order Success"
-		response.DataOrder = GetDataResponse(ID, "order", c)
+		response.DataOrder = GetDataResponse(ID, c)
 		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Update Order Failed Error"
@@ -374,71 +363,6 @@ func UpdateOrder(c *gin.Context) {
 		sendOrderErrorOResponse(c, response)
 	}
 }
-
-// // Update Rating
-// func UpdateRating(c *gin.Context) {
-// 	db := connect()
-// 	defer db.Close()
-
-// 	var order model.Order
-// 	order.ID, _ = strconv.Atoi(c.Param("order_id"))
-// 	order.Rating, _ = strconv.Atoi(c.PostForm("rating"))
-
-// 	_, errQuery := db.Exec("UPDATE `order` SET rating = ? WHERE id=?",
-// 		order.Rating,
-// 		order.ID,
-// 	)
-
-// 	var response model.RatingResponse
-// 	if errQuery == nil {
-// 		response.Message = "Update Rating Success"
-// 		response.Rating = order.Rating
-// 		sendRatingSuccessResponse(c, response)
-// 	} else {
-// 		response.Message = "Update Rating Failed Error"
-// 		fmt.Print(errQuery)
-// 		sendRatingErrorResponse(c, response)
-// 	}
-// }
-
-// BUAT FUNC PAYMENT TAPI TERNYATA UDAH ADA JADI GA DIPAKE :(
-// // Update Payment
-// func UpdatePayment(c *gin.Context) {
-// 	db := connect()
-// 	defer db.Close()
-
-// 	CustomerEmail := c.PostForm("customer_email")
-// 	// Get ID order dari DB
-// 	query := "SELECT ID FROM `order` WHERE customer_email='" + CustomerEmail + "' AND status=0;"
-
-// 	rows, err := db.Query(query)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-
-// 	var order model.Order
-// 	for rows.Next() {
-// 		if err := rows.Scan(&order.ID); err != nil {
-// 			log.Fatal(err.Error())
-// 		}
-// 	}
-
-// 	_, errQuery := db.Exec("UPDATE payment SET status_pembayaran = 1, waktu_pembayaran =?  WHERE id=?;",
-// 		time.Now().Format("2006-01-02 15:04:05"),
-// 		order.ID,
-// 	)
-
-// 	var response model.OrderResponse
-// 	if errQuery == nil {
-// 		response.Message = "Update Order Success"
-// 		response.DataOrder = GetDataResponse(strconv.Itoa(order.ID), "payment", c)
-// 		sendOrderSuccessResponse(c, response)
-// 	} else {
-// 		response.Message = "Update Order Failed Error"
-// 		fmt.Print(errQuery)
-// 		sendOrderErrorOResponse(c, response)
-// 	}
-// }
 
 // Delete Order...
 func DeleteOrder(c *gin.Context) {

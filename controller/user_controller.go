@@ -137,16 +137,17 @@ func Login(c *gin.Context) {
 		}
 	}
 
-	var response model.UserResponse
+	var response model.LoginResponse
 
 	if user.Password == password {
 
 		generateToken(c, user.ID, user.Nama, user.Email)
 		response.Message = "Login Success"
-		sendUserSuccessresponse(c, response)
+		response.Type = user.Position
+		sendLoginSuccessResponse(c, response)
 	} else {
 		response.Message = "Login Error"
-		sendUserErrorResponse(c, response)
+		sendLoginErrorResponse(c, response)
 	}
 }
 
