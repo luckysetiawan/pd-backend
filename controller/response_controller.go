@@ -67,6 +67,14 @@ func sendStatusErrorResponse(c *gin.Context, or model.StatusResponse) {
 	c.JSON(http.StatusBadRequest, or)
 }
 
+// func sendRatingSuccessResponse(c *gin.Context, or model.RatingResponse) {
+// 	c.JSON(http.StatusOK, or)
+// }
+
+// func sendRatingErrorResponse(c *gin.Context, or model.RatingResponse) {
+// 	c.JSON(http.StatusBadRequest, or)
+// }
+
 func sendActiveOrderSuccessResponse(c *gin.Context, or model.ActiveOrderResponse) {
 	c.JSON(http.StatusOK, or)
 }

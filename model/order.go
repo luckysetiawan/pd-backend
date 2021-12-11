@@ -19,6 +19,11 @@ type StatusResponse struct {
 	Status  []int  `form:"status" json:"status"`
 }
 
+type RatingResponse struct {
+	Message string `form:"message" json:"message"`
+	Rating  int    `form:"status" json:"status"`
+}
+
 type ActiveOrderResponse struct {
 	Message     string        `form:"message" json:"message"`
 	ActiveOrder []Order       `form:"activeOrder" json:"activeOrder"`

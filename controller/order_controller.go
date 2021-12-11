@@ -231,13 +231,11 @@ func InsertOrder(c *gin.Context) {
 	Waktu := time.Now()
 	Alamat := c.PostForm("alamat")
 	Status, _ := strconv.Atoi("0")
-	Rating, _ := strconv.Atoi(c.PostForm("rating"))
-	_, errQuery := db.Exec("INSERT INTO `order`(customer_email, waktu, alamat, status, rating) values (?,?,?,?,?)",
+	_, errQuery := db.Exec("INSERT INTO `order`(customer_email, waktu, alamat, status, rating) values (?,?,?,?,0)",
 		CustomerEmail,
 		Waktu,
 		Alamat,
 		Status,
-		Rating,
 	)
 
 	// Get ID order dari DB
@@ -376,6 +374,32 @@ func UpdateOrder(c *gin.Context) {
 		sendOrderErrorOResponse(c, response)
 	}
 }
+
+// // Update Rating
+// func UpdateRating(c *gin.Context) {
+// 	db := connect()
+// 	defer db.Close()
+
+// 	var order model.Order
+// 	order.ID, _ = strconv.Atoi(c.Param("order_id"))
+// 	order.Rating, _ = strconv.Atoi(c.PostForm("rating"))
+
+// 	_, errQuery := db.Exec("UPDATE `order` SET rating = ? WHERE id=?",
+// 		order.Rating,
+// 		order.ID,
+// 	)
+
+// 	var response model.RatingResponse
+// 	if errQuery == nil {
+// 		response.Message = "Update Rating Success"
+// 		response.Rating = order.Rating
+// 		sendRatingSuccessResponse(c, response)
+// 	} else {
+// 		response.Message = "Update Rating Failed Error"
+// 		fmt.Print(errQuery)
+// 		sendRatingErrorResponse(c, response)
+// 	}
+// }
 
 // BUAT FUNC PAYMENT TAPI TERNYATA UDAH ADA JADI GA DIPAKE :(
 // // Update Payment
