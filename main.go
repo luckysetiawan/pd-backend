@@ -76,7 +76,7 @@ func main() {
 		// Melihat Order
 		order.GET("/:order_id", controllers.GetOrder)
 		// Melihat Status
-		order.GET("/status/:order_id", controllers.GetStatus)
+		order.GET("/status", controllers.GetStatus)
 		// Membuat order
 		order.POST("/create", controllers.InsertOrder)
 		// Update order

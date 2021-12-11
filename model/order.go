@@ -16,7 +16,7 @@ type OrderResponse struct {
 
 type StatusResponse struct {
 	Message string `form:"message" json:"message"`
-	Status  int    `form:"status" json:"status"`
+	Status  []int  `form:"status" json:"status"`
 }
 
 type ActiveOrderResponse struct {

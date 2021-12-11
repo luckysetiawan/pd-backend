@@ -150,19 +150,22 @@ func GetStatus(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	ID := c.Param("order_id")
+	CustomerEmail := c.PostForm("customer_email")
 
-	query := "SELECT status FROM `order` WHERE id='" + ID + "';"
+	query := "SELECT status FROM `order` WHERE customer_email='" + CustomerEmail + "';"
 
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
 	}
 
-	var order model.Order
+	var order int
+	var orders []int
 	for rows.Next() {
-		if err := rows.Scan(&order.Status); err != nil {
+		if err := rows.Scan(&order); err != nil {
 			log.Fatal(err.Error())
+		} else {
+			orders = append(orders, order)
 		}
 	}
 
@@ -174,7 +177,7 @@ func GetStatus(c *gin.Context) {
 	var Response model.StatusResponse
 	if err == nil {
 		Response.Message = "Get Order Success"
-		Response.Status = order.Status
+		Response.Status = orders
 		sendStatusSuccessResponse(c, Response)
 	} else {
 		Response.Message = "Get Order Query Error"
