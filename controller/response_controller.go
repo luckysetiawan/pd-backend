@@ -83,6 +83,14 @@ func sendActiveOrderErrorResponse(c *gin.Context, or model.ActiveOrderResponse) 
 	c.JSON(http.StatusBadRequest, or)
 }
 
+func sendOrderDetailSuccessResponse(c *gin.Context, or model.OrderDetailResponse) {
+	c.JSON(http.StatusOK, or)
+}
+
+func sendOrderDetailErrorResponse(c *gin.Context, or model.OrderDetailResponse) {
+	c.JSON(http.StatusBadRequest, or)
+}
+
 // Transactions
 func sendTransactionSuccessResponse(c *gin.Context, tr model.TransactionResponse) {
 	c.JSON(http.StatusOK, tr)

@@ -82,6 +82,72 @@ func GetAllTransaction(c *gin.Context) {
 
 }
 
+func GetFinishedTransaction(c *gin.Context) {
+	db := connect()
+	defer db.Close()
+
+	query := "SELECT * FROM `order` WHERE status = 2"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var transaction model.Transaction
+	var transactions []model.Transaction
+	var order model.Order
+	var orders []model.Order
+	var orderdetails []model.OrderDetail
+
+	for rows.Next() { // loop order
+		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
+			&order.Alamat, &order.Status, &order.Rating); err != nil {
+			log.Fatal(err.Error())
+		} else {
+			if order.Status == 2 {
+				orders = append(orders, order)
+
+				detailquery := "SELECT * FROM `orderdetail` WHERE order_id = '" + strconv.Itoa(order.ID) + "';"
+
+				rows2, err2 := db.Query(detailquery)
+				if err2 != nil {
+					log.Println(err2)
+				}
+
+				for rows2.Next() { // loop orderdetail
+					var orderdetail model.OrderDetail
+
+					if err := rows2.Scan(&orderdetail.ID, &orderdetail.PizzaID, &orderdetail.OrderID, &orderdetail.Quantity, &orderdetail.TotalHarga); err != nil {
+						log.Fatal(err.Error())
+					} else {
+						if orderdetail.OrderID == order.ID {
+							orderdetails = append(orderdetails, orderdetail)
+						}
+					}
+				}
+
+				transaction.DetailOrder = append(transaction.DetailOrder, orderdetails...)
+				orderdetails = nil
+			}
+
+			transaction.DataOrder = order
+			transactions = append(transactions, transaction)
+			transaction.DetailOrder = nil
+		}
+
+		var Response model.TransactionResponse
+		if err == nil {
+			Response.Message = "Get Finished Transaction Success"
+			Response.Data = transactions
+			sendTransactionSuccessResponse(c, Response)
+		} else {
+			Response.Message = "Get Finished Transaction Query Error"
+			fmt.Print(err)
+			sendTransactionErrorResponse(c, Response)
+		}
+	}
+}
+
 func GetTransactionByPizza(c *gin.Context) {
 	db := connect()
 	defer db.Close()

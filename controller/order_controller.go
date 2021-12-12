@@ -154,6 +154,43 @@ func GetActiveOrders(c *gin.Context) {
 	}
 }
 
+// Get Rincian Pesanan Customer(staff)
+func GetOrderDetail(c *gin.Context) {
+	db := connect()
+	defer db.Close()
+
+	OrderID := c.PostForm("order_id")
+
+	query := "SELECT * FROM `orderdetail` WHERE order_id='" + OrderID + "';"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var orderDetail model.OrderDetail
+	var orderDetails []model.OrderDetail
+	for rows.Next() {
+		if err := rows.Scan(&orderDetail.ID, &orderDetail.PizzaID, &orderDetail.OrderID,
+			&orderDetail.Quantity, &orderDetail.TotalHarga); err != nil {
+			log.Fatal(err.Error())
+		} else {
+			orderDetails = append(orderDetails, orderDetail)
+		}
+	}
+
+	var Response model.OrderDetailResponse
+	if err == nil {
+		Response.Message = "Get Order Success"
+		Response.Data = orderDetails
+		sendOrderDetailSuccessResponse(c, Response)
+	} else {
+		Response.Message = "Get Order Query Error"
+		fmt.Print(err)
+		sendOrderDetailErrorResponse(c, Response)
+	}
+}
+
 // Get Status by Id
 func GetStatus(c *gin.Context) {
 	db := connect()

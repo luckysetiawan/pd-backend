@@ -84,17 +84,21 @@ func main() {
 		// Delete order
 		order.DELETE("/:order_id", controllers.DeleteOrder)
 
+		// Melihat rincian pesanan customer
+		order.GET("/detail", controllers.GetOrderDetail)
 		// Melihat order yang aktif/dimasak (chef)
 		order.GET("/active", controllers.GetActiveOrders)
 	}
 
 	transaction := router.Group("/transaction")
 	{
-		// Menampilkan transaksi yang telah selesai
+		// Menampilkan semua transaksi
 		transaction.GET("/all", controllers.GetAllTransaction)
-		// Menampilkan transaksi yang telah selesai berdasarkan pizza
+		// Menampilkan semua transaksi yang telah selesai
+		transaction.GET("/finished", controllers.GetFinishedTransaction)
+		// Menampilkan transaksi berdasarkan pizza
 		transaction.GET("/pizza", controllers.GetTransactionByPizza)
-		// Menampilkan transaksi yang telah selesai berdasarkan tanggal
+		// Menampilkan transaksi berdasarkan tanggal
 		transaction.GET("/date", controllers.GetTransactionByDate)
 	}
 
