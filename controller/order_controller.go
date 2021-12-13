@@ -160,7 +160,7 @@ func GetOrderDetail(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-// 	OrderID := c.PostForm("order_id")
+	// 	OrderID := c.PostForm("order_id")
 	OrderID := c.Param("order_id")
 
 	query := "SELECT * FROM `orderdetail` WHERE order_id='" + OrderID + "';"
@@ -414,7 +414,7 @@ func UpdateOrder(c *gin.Context) {
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Update Order Success"
-		response.DataOrder = GetDataResponse(idOrder, c)
+		response.DataOrder = GetDataResponse(idOrder, "order", c)
 		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Update Order Failed Error"
