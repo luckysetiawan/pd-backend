@@ -159,7 +159,8 @@ func GetOrderDetail(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	OrderID := c.PostForm("order_id")
+// 	OrderID := c.PostForm("order_id")
+	OrderID := c.Param("order_id")
 
 	query := "SELECT * FROM `orderdetail` WHERE order_id='" + OrderID + "';"
 
