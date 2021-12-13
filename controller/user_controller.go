@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"log"
 
 	model "pd-backend/model"
@@ -120,10 +121,12 @@ func Login(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	email := c.PostForm("email")
-	password := c.PostForm("password")
-
-	query := "SELECT * FROM users where email='" + email + "'"
+	var userData model.User
+	err := json.NewDecoder(c.Request.Body).Decode(&userData)
+	if err != nil {
+		log.Println(err)
+	}
+	query := "SELECT * FROM users where email='" + userData.Email + "'"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -139,7 +142,7 @@ func Login(c *gin.Context) {
 
 	var response model.LoginResponse
 
-	if user.Password == password {
+	if user.Password == userData.Password {
 
 		generateToken(c, user.ID, user.Nama, user.Email)
 		response.Message = "Login Success"
