@@ -128,23 +128,21 @@ func GetFinishedTransaction(c *gin.Context) {
 
 				transaction.DetailOrder = append(transaction.DetailOrder, orderdetails...)
 				orderdetails = nil
-			}
-
-			transaction.DataOrder = order
-			transactions = append(transactions, transaction)
-			transaction.DetailOrder = nil
 		}
-
-		var Response model.TransactionResponse
-		if err == nil {
-			Response.Message = "Get Finished Transaction Success"
-			Response.Data = transactions
-			sendTransactionSuccessResponse(c, Response)
-		} else {
-			Response.Message = "Get Finished Transaction Query Error"
-			fmt.Print(err)
-			sendTransactionErrorResponse(c, Response)
+		transaction.DataOrder = order
+		transactions = append(transactions, transaction)
+		transaction.DetailOrder = nil
 		}
+	}
+	var Response model.TransactionResponse
+	if err == nil {
+		Response.Message = "Get Finished Transaction Success"
+		Response.Data = transactions
+		sendTransactionSuccessResponse(c, Response)
+	} else {
+		Response.Message = "Get Finished Transaction Query Error"
+		fmt.Print(err)
+		sendTransactionErrorResponse(c, Response)
 	}
 }
 
