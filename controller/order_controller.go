@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -356,14 +357,20 @@ func UpdateOrder(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	ID := c.Param("order_id")
-	CustomerEmail := c.PostForm("customer_email")
-	Waktu := c.PostForm("waktu")
-	Alamat := c.PostForm("alamat")
-	Status := c.PostForm("status")
-	Rating := c.PostForm("rating")
+	// ID := c.Param("order_id")
+	// CustomerEmail := c.PostForm("customer_email")
+	// Waktu := c.PostForm("waktu")
+	// Alamat := c.PostForm("alamat")
+	// Status := c.PostForm("status")
+	// Rating := c.PostForm("rating")
 
-	rows, _ := db.Query("SELECT * FROM `order` WHERE id='" + ID + "'")
+	var orderData model.Order
+	err := json.NewDecoder(c.Request.Body).Decode(&orderData)
+	if err != nil {
+		log.Println(err)
+	}
+	idOrder := strconv.Itoa(orderData.ID)
+	rows, _ := db.Query("SELECT * FROM `order` WHERE id='" + idOrder + "'")
 	var order model.Order
 	for rows.Next() {
 		if err := rows.Scan(&order.ID, &order.CustomerEmail, &order.Waktu,
@@ -373,41 +380,41 @@ func UpdateOrder(c *gin.Context) {
 	}
 
 	// Jika kosong dimasukkan nilai lama
-	if ID == "" {
-		ID = strconv.Itoa(order.ID)
+	if idOrder == "" {
+		idOrder = strconv.Itoa(order.ID)
 	}
 
-	if CustomerEmail == "" {
-		CustomerEmail = order.CustomerEmail
+	if orderData.CustomerEmail == "" {
+		orderData.CustomerEmail = order.CustomerEmail
 	}
 
-	if Waktu == "" {
-		Waktu = order.Waktu
+	if orderData.Waktu == "" {
+		orderData.Waktu = order.Waktu
 	}
 
-	if Alamat == "" {
-		Alamat = order.Alamat
+	if orderData.Alamat == "" {
+		orderData.Alamat = order.Alamat
 	}
 
-	if Status == "" {
-		Status = strconv.Itoa(order.Status)
-	}
-	if Rating == "" {
-		Rating = strconv.Itoa(order.Rating)
-	}
+	// if orderData.Status == 0 {
+	// 	orderData.Status = order.Status
+	// }
+	// if orderData.Rating == 0 {
+	// 	orderData.Rating = order.Rating
+	// }
 	_, errQuery := db.Exec("UPDATE `order` SET customer_email = ?, waktu = ?, alamat = ?, status = ?, rating = ? WHERE id=?",
-		CustomerEmail,
-		Waktu,
-		Alamat,
-		Status,
-		Rating,
-		ID,
+		orderData.CustomerEmail,
+		orderData.Waktu,
+		orderData.Alamat,
+		orderData.Status,
+		orderData.Rating,
+		idOrder,
 	)
 
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Update Order Success"
-		response.DataOrder = GetDataResponse(ID, "order", c)
+		response.DataOrder = GetDataResponse(idOrder, c)
 		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Update Order Failed Error"
