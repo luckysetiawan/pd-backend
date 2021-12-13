@@ -150,7 +150,8 @@ func GetTransactionByPizza(c *gin.Context) {
 	db := connect()
 	defer db.Close()
 
-	pizza, _ := strconv.Atoi(c.PostForm("pizza_id"))
+// 	pizza, _ := strconv.Atoi(c.PostForm("pizza_id"))
+	pizza, _ := strconv.Atoi(c.Param("pizza_id"))
 
 	query := "SELECT * FROM `order`"
 
