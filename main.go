@@ -85,7 +85,7 @@ func main() {
 		order.DELETE("/:order_id", controllers.DeleteOrder)
 
 		// Melihat rincian pesanan customer
-		order.GET("/detail", controllers.GetOrderDetail)
+		order.GET("/detail/:order_id", controllers.GetOrderDetail)
 		// Melihat order yang aktif/dimasak (chef)
 		order.GET("/active", controllers.GetActiveOrders)
 	}
@@ -97,7 +97,7 @@ func main() {
 		// Menampilkan semua transaksi yang telah selesai
 		transaction.GET("/finished", controllers.GetFinishedTransaction)
 		// Menampilkan transaksi berdasarkan pizza
-		transaction.GET("/pizza", controllers.GetTransactionByPizza)
+		transaction.GET("/pizza/:pizza_id", controllers.GetTransactionByPizza)
 		// Menampilkan transaksi berdasarkan tanggal
 		transaction.GET("/date", controllers.GetTransactionByDate)
 	}
