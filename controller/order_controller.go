@@ -235,17 +235,16 @@ func GetStatus(c *gin.Context) {
 }
 
 // Get Response untuk fungsi lain
-func GetDataResponse(ID string, c *gin.Context) []model.Order {
+func GetDataResponse(ID string, table string, c *gin.Context) []model.Order {
 	db := connect()
 	defer db.Close()
 
-	query := "SELECT * FROM `order` WHERE id='" + ID + "';"
+	query := "SELECT * FROM `" + table + "` WHERE id='" + ID + "';"
 
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(err)
 	}
-
 	var order model.Order
 	var orders []model.Order
 	for rows.Next() {
@@ -257,81 +256,92 @@ func GetDataResponse(ID string, c *gin.Context) []model.Order {
 		}
 	}
 	return orders
+
 }
 
 // Insert Order
 func InsertOrder(c *gin.Context) {
 	db := connect()
 	defer db.Close()
-
+	//Insert Customer dari DB
 	CustomerEmail := c.PostForm("customer_email")
 	Nama := c.PostForm("nama")
 	NoTelp := c.PostForm("no_telp")
-
 	db.Exec("INSERT INTO customer (email, nama, no_telp) values (?,?,?)",
 		CustomerEmail,
 		Nama,
 		NoTelp,
 	)
-
-	ID, _ := strconv.Atoi(c.PostForm("id")) //Ini ntar nggausah biar autoincrement
 	Waktu := time.Now()
 	Alamat := c.PostForm("alamat")
 	Status, _ := strconv.Atoi("0")
-	Rating, _ := strconv.Atoi(c.PostForm("rating"))
-	_, errQuery := db.Exec("INSERT INTO `order`(id, customer_email, waktu, alamat, status, rating) values (?,?,?,?,?,?)",
-		ID,
+	_, errQuery := db.Exec("INSERT INTO `order`(customer_email, waktu, alamat, status, rating) values (?,?,?,?,0)",
 		CustomerEmail,
 		Waktu,
 		Alamat,
 		Status,
-		Rating,
 	)
 
-	// GET DATA ORDER DARI DB
-
-	// NewOrder = GET ORDER
-
-	Pizza := c.PostForm("pizza_id")
-	// OrderID := c.PostForm("order_id")
-	quantity := c.PostForm("quantity")
-	pizzaArr := strings.Split(Pizza, ",")
-	quantityArr := strings.Split(quantity, ",")
-
-	//Hitung Total Harga
-
-	//Tambah Insert Total Harga
-	for i := 0; i < len(pizzaArr); i++ {
-		db.Exec("INSERT INTO orderdetail (pizza_id, order_id, quantity) values (?,?,?)",
-			pizzaArr[i],
-			ID, //ID DARI DB
-			quantityArr[i],
-			//TotalHarga,
-		)
-
+	// Get ID order dari DB
+	query := "SELECT ID FROM `order` WHERE customer_email='" + CustomerEmail + "' AND status=0;"
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println(err)
 	}
-
-	// var orderID model.Order
-	// if c.PostForm("id") == "" {
-	// 	getID, errID := db.Query("SELECT id FROM `order` WHERE waktu=" + time.Now() + ";")
-	// 	if err := getID.Scan(&orderID.ID); errID != nil {
-	// 		log.Fatal(err.Error)
-	// 		log.Println(err.Error)
-	// 		fmt.Println(ID)
-	// 	}
-	// } else {
-	// 	orderID.ID = ID
-	// }
-
-	// _, errQuery := db.Exec("INSERT INTO payment(order_id,customer_email, status_pembayaran) values (?,?,0)",
-	// 	orderID,
-	// 	CustomerEmail,
-	// )
-
+	var order model.Order
+	for rows.Next() {
+		if err := rows.Scan(&order.ID); err != nil {
+			log.Fatal(err.Error())
+		}
+	}
+	Pizza := c.PostForm("pizza_id")
+	Quantity := c.PostForm("quantity")
+	PizzaArr := strings.Split(Pizza, ",")
+	QuantityArr := strings.Split(Quantity, ",")
+	var TotalHarga int
+	TotalPembayaran := 0
+	//Tambah Insert Total Harga
+	for i := 0; i < len(PizzaArr); i++ {
+		//Get harga dari DB
+		query := "SELECT harga FROM pizza WHERE id=" + PizzaArr[i] + ";"
+		rows, err := db.Query(query)
+		if err != nil {
+			log.Println(err)
+		}
+		var pizza model.Menu
+		for rows.Next() {
+			if err := rows.Scan(&pizza.Harga); err != nil {
+				log.Fatal(err.Error())
+			}
+		}
+		//Perhitungan Total Harga
+		TempQuantity, _ := strconv.Atoi(QuantityArr[i])
+		TotalHarga = pizza.Harga * int(TempQuantity)
+		TotalPembayaran += TotalHarga
+		fmt.Println("TotalHarga:", TotalHarga)
+		fmt.Println("pizza.Harga:", pizza.Harga)
+		fmt.Println("TempQuantity:", TempQuantity)
+		fmt.Println("TotalPembayaran:", TotalPembayaran)
+		fmt.Println(".")
+		fmt.Println("PizzaArr[i]:", PizzaArr[i])
+		fmt.Println("order.ID:", order.ID)
+		fmt.Println("QuantityArr[i]:", QuantityArr[i])
+		//Insert total harga ke DB
+		_, errQuery = db.Exec("INSERT INTO orderdetail (pizza_id, order_id, quantity, total_harga) values (?,?,?,?)",
+			PizzaArr[i],
+			order.ID,
+			QuantityArr[i],
+			TotalHarga,
+		)
+	}
+	_, errQuery = db.Exec("INSERT INTO payment(order_id, status_pembayaran, total_pembayaran) values (?,0,?)",
+		order.ID,
+		TotalPembayaran,
+	)
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Insert Order Success"
-		response.DataOrder = GetDataResponse(strconv.Itoa(ID), c)
+		response.DataOrder = GetDataResponse(strconv.Itoa(order.ID), "order", c)
 		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Insert Order Failed"
@@ -396,7 +406,7 @@ func UpdateOrder(c *gin.Context) {
 	var response model.OrderResponse
 	if errQuery == nil {
 		response.Message = "Update Order Success"
-		response.DataOrder = GetDataResponse(ID, c)
+		response.DataOrder = GetDataResponse(ID, "order", c)
 		sendOrderSuccessResponse(c, response)
 	} else {
 		response.Message = "Update Order Failed Error"
