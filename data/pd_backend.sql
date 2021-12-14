@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 13 Des 2021 pada 20.11
--- Versi server: 10.4.21-MariaDB
--- Versi PHP: 8.0.12
+-- Generation Time: Dec 14, 2021 at 02:11 AM
+-- Server version: 10.4.21-MariaDB
+-- PHP Version: 8.0.11
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `customer`
+-- Table structure for table `customer`
 --
 
 CREATE TABLE `customer` (
@@ -34,10 +34,11 @@ CREATE TABLE `customer` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data untuk tabel `customer`
+-- Dumping data for table `customer`
 --
 
 INSERT INTO `customer` (`email`, `nama`, `no_telp`) VALUES
+('', '', ''),
 ('asdfasdfs@gmail.com', 'christ', '0818763984'),
 ('christ@gmail.com', 'christ', '0818763984'),
 ('pembeli@gmail.com', 'pembeli', '081758934'),
@@ -48,7 +49,7 @@ INSERT INTO `customer` (`email`, `nama`, `no_telp`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `order`
+-- Table structure for table `order`
 --
 
 CREATE TABLE `order` (
@@ -61,19 +62,21 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data untuk tabel `order`
+-- Dumping data for table `order`
 --
 
 INSERT INTO `order` (`id`, `customer_email`, `waktu`, `alamat`, `status`, `rating`) VALUES
 (1, 'pembeli@gmail.com', '2021-12-02 13:53:07', 'Pluto', 0, 8),
 (2, 'test@gmail.com', '2021-12-02 13:57:34', 'Milky Way', 1, 8),
 (18, 'testt@gmail.com', '2021-12-07 01:51:29', 'bumi', 0, 5),
-(19, 'testt@gmail.com', '2021-12-07 01:55:16', 'bumi', 0, 5);
+(19, 'testt@gmail.com', '2021-12-07 01:55:16', 'bumi', 0, 5),
+(50, '', '2021-12-14 08:06:42', '', 0, 0),
+(51, '', '2021-12-14 08:06:53', '', 0, 0);
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `orderdetail`
+-- Table structure for table `orderdetail`
 --
 
 CREATE TABLE `orderdetail` (
@@ -85,7 +88,7 @@ CREATE TABLE `orderdetail` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data untuk tabel `orderdetail`
+-- Dumping data for table `orderdetail`
 --
 
 INSERT INTO `orderdetail` (`id`, `pizza_id`, `order_id`, `quantity`, `total_harga`) VALUES
@@ -96,7 +99,7 @@ INSERT INTO `orderdetail` (`id`, `pizza_id`, `order_id`, `quantity`, `total_harg
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `payment`
+-- Table structure for table `payment`
 --
 
 CREATE TABLE `payment` (
@@ -108,7 +111,7 @@ CREATE TABLE `payment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data untuk tabel `payment`
+-- Dumping data for table `payment`
 --
 
 INSERT INTO `payment` (`id`, `order_id`, `status_pembayaran`, `total_pembayaran`, `waktu_pembayaran`) VALUES
@@ -119,7 +122,7 @@ INSERT INTO `payment` (`id`, `order_id`, `status_pembayaran`, `total_pembayaran`
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `pizza`
+-- Table structure for table `pizza`
 --
 
 CREATE TABLE `pizza` (
@@ -131,7 +134,7 @@ CREATE TABLE `pizza` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data untuk tabel `pizza`
+-- Dumping data for table `pizza`
 --
 
 INSERT INTO `pizza` (`id`, `nama`, `deskripsi`, `harga`, `gambar`) VALUES
@@ -151,7 +154,7 @@ INSERT INTO `pizza` (`id`, `nama`, `deskripsi`, `harga`, `gambar`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -164,13 +167,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data untuk tabel `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `nama`, `email`, `password`, `no_telp`, `position`) VALUES
 (1, 'owner', 'owner@gmail.com', 'owner', '123', 'owner'),
 (2, 'staff', 'staff@gmail.com', 'staff', '123', 'staff'),
-(3, 'chef', 'chef@gmail.com', 'chef', '123', 'cheff'),
+(3, 'chef', 'chef@gmail.com', 'chef', '123', 'chef'),
 (4, 'delivery', 'delivery@gmail.com', 'delivery', '123', 'delivery');
 
 --
@@ -178,20 +181,20 @@ INSERT INTO `users` (`id`, `nama`, `email`, `password`, `no_telp`, `position`) V
 --
 
 --
--- Indeks untuk tabel `customer`
+-- Indexes for table `customer`
 --
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`email`);
 
 --
--- Indeks untuk tabel `order`
+-- Indexes for table `order`
 --
 ALTER TABLE `order`
   ADD PRIMARY KEY (`id`),
   ADD KEY `customer_email` (`customer_email`);
 
 --
--- Indeks untuk tabel `orderdetail`
+-- Indexes for table `orderdetail`
 --
 ALTER TABLE `orderdetail`
   ADD PRIMARY KEY (`id`),
@@ -199,77 +202,77 @@ ALTER TABLE `orderdetail`
   ADD KEY `order_id` (`order_id`);
 
 --
--- Indeks untuk tabel `payment`
+-- Indexes for table `payment`
 --
 ALTER TABLE `payment`
   ADD PRIMARY KEY (`id`),
   ADD KEY `order` (`order_id`);
 
 --
--- Indeks untuk tabel `pizza`
+-- Indexes for table `pizza`
 --
 ALTER TABLE `pizza`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`);
 
 --
--- AUTO_INCREMENT untuk tabel yang dibuang
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT untuk tabel `order`
+-- AUTO_INCREMENT for table `order`
 --
 ALTER TABLE `order`
-  MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
--- AUTO_INCREMENT untuk tabel `orderdetail`
+-- AUTO_INCREMENT for table `orderdetail`
 --
 ALTER TABLE `orderdetail`
   MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
--- AUTO_INCREMENT untuk tabel `payment`
+-- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
   MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
--- AUTO_INCREMENT untuk tabel `pizza`
+-- AUTO_INCREMENT for table `pizza`
 --
 ALTER TABLE `pizza`
   MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT untuk tabel `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
+-- Constraints for dumped tables
 --
 
 --
--- Ketidakleluasaan untuk tabel `order`
+-- Constraints for table `order`
 --
 ALTER TABLE `order`
   ADD CONSTRAINT `customer_email` FOREIGN KEY (`customer_email`) REFERENCES `customer` (`email`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Ketidakleluasaan untuk tabel `orderdetail`
+-- Constraints for table `orderdetail`
 --
 ALTER TABLE `orderdetail`
   ADD CONSTRAINT `order_id` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `pizza_id` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Ketidakleluasaan untuk tabel `payment`
+-- Constraints for table `payment`
 --
 ALTER TABLE `payment`
   ADD CONSTRAINT `order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
